@@ -2,10 +2,6 @@
 
 This repository contains scripts and configurations to streamline the creation and management of project slides from Linear initiatives, and to communicate updates via email. Below is a description of each file in the repository:
 
-## What It Does
-
-
-
 ## Usage
 
 This is a clasp project, which means that it's a Google Apps Script project that uses the [clasp](https://developers.google.com/apps-script/guides/clasp) tool to bundle and deploy the project as a single `.gs` file. Everything in the `src` directory is included in the `.gs` file, and the `clasp.json` file configures the project settings. We can build the `.gs` file by running the following commands:
