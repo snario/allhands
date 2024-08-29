@@ -169,6 +169,11 @@ export function fetchAllProjects(apiKey: string) {
         endCursor = pageInfo.endCursor;
     }
 
+    allProjects = allProjects.sort(
+        (a, b) =>
+            new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime(),
+    );
+
     return allProjects.filter((obj) => obj.initiatives.nodes.length > 0);
 }
 
