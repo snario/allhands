@@ -1,0 +1,4 @@
+{
+    "scriptId": "{{ insert your script id here }}",
+    "rootDir": "dist"
+}

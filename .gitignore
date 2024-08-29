@@ -14,4 +14,5 @@ node_modules/
 # Build directory
 dist/
 
+.clasp.json
 .clasprc.json
