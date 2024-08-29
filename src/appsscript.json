@@ -1,0 +1,29 @@
+{
+    "timeZone": "America/Los_Angeles",
+    "dependencies": {},
+    "exceptionLogging": "STACKDRIVER",
+    "runtimeVersion": "V8",
+    "urlFetchWhitelist": [
+        "https://api.linear.app/graphql",
+        "https://liamhorne.com/"
+    ],
+    "oauthScopes": [
+        "https://www.googleapis.com/auth/script.send_mail",
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/script.external_request",
+        "https://www.googleapis.com/auth/presentations",
+        "https://www.googleapis.com/auth/script.locale"
+    ],
+    "addOns": {
+        "common": {
+            "name": "Linear Initiatives as Google Slides",
+            "logoUrl": "https://pbs.twimg.com/profile_images/1484940553993211910/0wGrCrB3_400x400.jpg",
+            "useLocaleFromApp": true
+        },
+        "slides": {
+            "homepageTrigger": {
+                "runFunction": "onOpen"
+            }
+        }
+    }
+}
