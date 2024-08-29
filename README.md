@@ -20,9 +20,15 @@ npm run push
 
 This will overwrite the existing project with the new `index.gs` file.
 
-To run the scripts, go to the [Google Apps Script editor](https://script.google.com/home) and run one of the main scripts for the project like the `createSlidesFromLinearInitiatives` function.
+To run the scripts, go to the [Google Apps Script editor](https://script.google.com/home) and run one of the main scripts for the project like the `createSlidesFromLinearInitiatives` function. By default, this won't work because you need to set up a secret for the `LINEAR_API_KEY` variable and the scripts check that you're on an active presentation, but you can test on the script editor if you want.
 
 Make sure you edit the `clasp.json` file to include your own project ID.
+
+## Installation
+
+To install the project, go to the [Google Apps Script editor](https://script.google.com/home) and click on the "New Deployment" button. You can then select the "Deploy as add-on" option and deploy it to your GCP or as a test deployment. You should see it show up in your Add-Ons menu of a Google Slides document.
+
+
 
 ## Development
 
@@ -60,6 +66,5 @@ These are the main scripts for the project and should be the only functions that
 | File                                   | Description                                            |
 | -------------------------------------- | ------------------------------------------------------ |
 | [appsscript.json](src/appsscript.json) | Configuration file for the Google Apps Script project. |
-| [config.ts](src/config.ts)             | Contains configuration settings.                       |
 | [constants.ts](src/constants.ts)       | Defines useful constants used throughout the project.  |
 
