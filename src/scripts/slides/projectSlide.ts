@@ -142,7 +142,7 @@ export default {
                     width: 220,
                     height: 20,
                 },
-                `Written by ${getFirstName(user.name)} written on ${formatDate(createdAt)}`,
+                `Written by ${getFirstName(user.name)} on ${formatDate(createdAt)}`,
             );
         }
 
