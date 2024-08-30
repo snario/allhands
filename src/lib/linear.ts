@@ -39,7 +39,7 @@ export type InitiativeWithProjects = Initiative & {
 export type ProjectUpdate = {
     body: string;
     createdAt: string;
-    user: string;
+    user: { name: string };
 };
 
 const LINEAR_API_URL = "https://api.linear.app/graphql";

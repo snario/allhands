@@ -37,6 +37,10 @@ export function rightPad(str?: string | null) {
 
 export type HexColor = `#${string}`;
 
+export function getFirstName(name: string) {
+    return name.split(" ")[0];
+}
+
 export function formatDate(date: string) {
     return new Intl.DateTimeFormat("en-US", {
         timeZone: "GMT",

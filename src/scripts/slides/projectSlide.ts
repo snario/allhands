@@ -1,10 +1,15 @@
-import { EMPTY_STRING, TEXT_COLOR_SECONDARY } from "../../constants";
+import {
+    DEFAULT_AVATAR_URL,
+    EMPTY_STRING,
+    TEXT_COLOR_SECONDARY,
+} from "../../constants";
 import { getEmojiFromJSON } from "../../lib/emoji";
 import {
     adjustFontSizeToFit,
     applyTextFormatting,
     formatDate,
     getDateFormatting,
+    getFirstName,
     getHealthFormatting,
     getStatusFormatting,
     rightPad,
@@ -97,8 +102,20 @@ export default {
             getHealthIconUrl(project.health),
         );
 
+        // Avatar of the lead
+        insertImage(
+            slide,
+            {
+                left: 560,
+                top: 40,
+                width: 60,
+                height: 60,
+            },
+            project.lead?.avatarUrl || DEFAULT_AVATAR_URL,
+        );
+
         if (project.projectUpdates.nodes.length > 0) {
-            const { body, createdAt } = project.projectUpdates.nodes[0];
+            const { body, createdAt, user } = project.projectUpdates.nodes[0];
 
             // Markdown body of the latest update autosized to fit the slide
             adjustFontSizeToFit(
@@ -120,12 +137,12 @@ export default {
                     fontSize: 10,
                 },
                 {
-                    left: 520,
+                    left: 480,
                     top: 105,
-                    width: 180,
+                    width: 220,
                     height: 20,
                 },
-                `Latest update written on ${formatDate(createdAt)}`,
+                `Written by ${getFirstName(user.name)} written on ${formatDate(createdAt)}`,
             );
         }
 
