@@ -144,7 +144,7 @@ function buildSubtitleTextBox(
 ) {
     const separator = " | ";
     const separatorStyle: SubtitleSectionStyle = {
-        backgroundColor: undefined,
+        backgroundColor: null,
         fontColor: TEXT_COLOR_SECONDARY,
     };
 
