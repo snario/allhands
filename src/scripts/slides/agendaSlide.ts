@@ -68,7 +68,7 @@ export default {
                 {
                     left: 90,
                     top: topPosition,
-                    width: 420,
+                    width: 400,
                     height: 20,
                 },
                 `${rightPad(getEmojiFromJSON(initiative.icon))}${initiative.name}`,
