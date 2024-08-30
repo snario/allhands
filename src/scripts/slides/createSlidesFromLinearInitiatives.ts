@@ -48,8 +48,6 @@ export default function createSlidesFromLinearInitiatives(): void {
     Logger.log("Slides created or updated successfully");
 
     saveCacheToDocumentProperties(presentation, cache);
-
-    Logger.log("Slides created or updated successfully");
 }
 
 function fetchAndPrepareData(apiKey: string): InitiativeWithProjects[] {
