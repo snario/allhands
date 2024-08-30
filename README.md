@@ -4,7 +4,15 @@ This repository contains scripts and configurations to streamline the creation a
 
 ## Usage
 
-This is a clasp project, which means that it's a Google Apps Script project that uses the [clasp](https://developers.google.com/apps-script/guides/clasp) tool to bundle and deploy the project as a single `.gs` file. Everything in the `src` directory is included in the `.gs` file, and the `clasp.json` file configures the project settings. We can build the `.gs` file by running the following commands:
+This is a clasp project, which means that it's a Google Apps Script project that uses the [clasp](https://developers.google.com/apps-script/guides/clasp) tool to bundle and deploy the project as a single `.gs` file. 
+
+Setting up clasp properly requires:
+- Creating a Google Apps Script project ([click here](https://script.google.com/home/start))
+- Adding the project ID to a `.clasp.json` file
+- Enabling the Google Apps Script API ([click here](https://script.google.com/home/usersettings))
+- Logging into clasp with `clasp login` (and storing `.clasrpc.json`)
+
+We can build the project file by running the following command:
 
 ```sh
 npm run build
@@ -12,23 +20,21 @@ npm run build
 
 This will create a `dist` directory with an `index.js` and `appsscript.json` file.
 
-Then, if we run the push command, we can deploy the `.gs` file to Google Apps Script:
+Then, if we run the push command, we can deploy this file to Google Apps Script:
 
 ```sh
 npm run push
 ```
 
-This will overwrite the existing project with the new `index.gs` file.
+This will overwrite the existing project with a new `index.gs` file.
 
-To run the scripts, go to the [Google Apps Script editor](https://script.google.com/home) and run one of the main scripts for the project like the `createSlidesFromLinearInitiatives` function. By default, this won't work because you need to set up a secret for the `LINEAR_API_KEY` variable and the scripts check that you're on an active presentation, but you can test on the script editor if you want.
+To run the scripts, go to the [Google Apps Script editor](https://script.google.com/home) and run one of the main scripts for the project like the `createSlidesFromLinearInitiatives` function. 
 
-Make sure you edit the `clasp.json` file to include your own project ID.
+By default, this won't work because you need to set up a secret for the `LINEAR_API_KEY` variable and the scripts check that you're on an active presentation, but you can test on the script editor if you want.
 
 ## Installation
 
 To install the project, go to the [Google Apps Script editor](https://script.google.com/home) and click on the "New Deployment" button. You can then select the "Deploy as add-on" option and deploy it to your GCP or as a test deployment. You should see it show up in your Add-Ons menu of a Google Slides document.
-
-
 
 ## Development
 
