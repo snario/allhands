@@ -1,0 +1,93 @@
+fragment InitiativeFields on Initiative {
+    id
+    icon
+    color
+    name
+    description
+    targetDate
+    status
+    owner {
+        name
+        avatarUrl
+    }
+}
+
+fragment ProjectFields on Project {
+    id
+    name
+    startDate
+    targetDate
+    description
+    icon
+    color
+    url
+    status {
+        name
+    }
+    projectUpdates {
+        nodes {
+            body
+            createdAt
+            user {
+                name
+            }
+        }
+    }
+    initiatives {
+        nodes {
+            id
+        }
+    }
+    lead {
+        name
+        email
+        avatarUrl
+    }
+    health
+}
+
+query GetInitiatives {
+    initiatives {
+        nodes {
+            ...InitiativeFields
+        }
+    }
+}
+
+query GetProjects($endCursor: String) {
+    projects(
+        filter: {
+            or: [
+                {
+                    status: {
+                        name: { nin: ["Canceled", "Completed", "Backlog"] }
+                    }
+                }
+                { completedAt: { gte: "-P14D" } }
+                { canceledAt: { gte: "-P14D" } }
+            ]
+        }
+        first: 50
+        after: $endCursor
+    ) {
+        pageInfo {
+            hasNextPage
+            endCursor
+        }
+        nodes {
+            ...ProjectFields
+        }
+    }
+}
+
+query GetInitiative($id: String!) {
+    initiative(id: $id) {
+        ...InitiativeFields
+    }
+}
+
+query GetProject($id: String!) {
+    project(id: $id) {
+        ...ProjectFields
+    }
+}

@@ -1,3 +1,5 @@
+import schema from "./graphql/schema.graphql";
+
 export type Initiative = {
     id: string;
     name: string;
@@ -147,17 +149,17 @@ export function mapProjectsToInitiatives(
 }
 
 export function fetchInitiative(apiKey: string, initiativeId: string) {
-    const resp = fetchLinearData(apiKey, InitiativeQuery, { id: initiativeId });
+    const resp = fetchLinearData(apiKey, "GetInitiative", { id: initiativeId });
     return resp.data.initiative;
 }
 
 export function fetchProject(apiKey: string, projectId: string) {
-    const resp = fetchLinearData(apiKey, ProjectQuery, { id: projectId });
+    const resp = fetchLinearData(apiKey, "GetProject", { id: projectId });
     return resp.data.project;
 }
 
 export function fetchAllInitiatives(apiKey: string) {
-    const data = fetchLinearData(apiKey, InitiativesQuery);
+    const data = fetchLinearData(apiKey, "GetInitiatives");
     return data.data.initiatives.nodes;
 }
 
@@ -167,7 +169,7 @@ export function fetchAllProjects(apiKey: string) {
     let endCursor = null;
 
     while (hasNextPage) {
-        const more = fetchLinearData(apiKey, ProjectsQuery, { endCursor });
+        const more = fetchLinearData(apiKey, "GetProjects", { endCursor });
 
         const projects = more.data.projects.nodes;
         const pageInfo = more.data.projects.pageInfo;
@@ -186,7 +188,11 @@ export function fetchAllProjects(apiKey: string) {
     return allProjects.filter((obj) => obj.initiatives.nodes.length > 0);
 }
 
-export function fetchLinearData(apiKey: string, query: string, variables = {}) {
+export function fetchLinearData(
+    apiKey: string,
+    operationName: string,
+    variables = {},
+) {
     const response = UrlFetchApp.fetch(LINEAR_API_URL, {
         method: "post",
         contentType: "application/json",
@@ -194,144 +200,14 @@ export function fetchLinearData(apiKey: string, query: string, variables = {}) {
             Authorization: apiKey,
             "public-file-urls-expire-in": "60", // 1 min expiry
         },
-        payload: JSON.stringify({ query, variables }),
+        payload: JSON.stringify({
+            query: schema.loc.source.body,
+            operationName,
+            variables,
+        }),
     });
     return JSON.parse(response.getContentText());
 }
-
-const InitiativesQuery = `
-    query GetInitiatives {
-        initiatives {
-            nodes {
-                id
-                icon
-                color
-                name
-                description
-                targetDate
-                status
-                owner {
-                    name
-                    avatarUrl
-                }
-            }
-        }
-    }
-`;
-
-const ProjectsQuery = `
-    query GetProjects($endCursor: String) {
-        projects(
-            filter: {
-                or: [
-                    {
-                        status: {
-                            name: { nin: ["Canceled", "Completed", "Backlog"] }
-                        }
-                    },
-                    { completedAt: { gte: "-P14D" } },
-                    { canceledAt: { gte: "-P14D" } }
-                ]
-            },
-            first: 50,
-            after: $endCursor
-        ) {
-            pageInfo {
-                hasNextPage
-                endCursor
-            }
-            nodes {
-                id
-                name
-                startDate
-                targetDate
-                description
-                icon
-                color
-                url
-                status {
-                    name
-                }
-                projectUpdates {
-                    nodes {
-                        body
-                        createdAt
-                        user {
-                            name
-                        }
-                    }
-                }
-                initiatives {
-                    nodes {
-                        id
-                    }
-                }
-                lead {
-                    name
-                    email
-                    avatarUrl
-                }
-                health
-            }
-        }
-    }
-`;
-
-export const ProjectQuery = `
-    query GetProject($id: String!) {
-        project(id: $id) {
-            id
-            name
-            startDate
-            targetDate
-            description
-            icon
-            color
-            url
-            status {
-                name
-            }
-            projectUpdates {
-                nodes {
-                    body
-                    createdAt
-                    user {
-                        name
-                    }
-                }
-            }
-            initiatives {
-                nodes {
-                    id
-                }
-            }
-            lead {
-                name
-                email
-                avatarUrl
-            }
-            health
-        }
-    }
-`;
-
-export const InitiativeQuery = `
-    query GetInitiative($id: String!) {
-        initiative(id: $id) {
-            id
-            icon
-            color
-            name
-            description
-            targetDate
-            status
-            owner {
-                name
-                avatarUrl
-            }
-        }
-    }
-`;
 
 export default {
     isProjectOverdue,

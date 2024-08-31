@@ -22,6 +22,7 @@
         "node": ">=18"
     },
     "devDependencies": {
+        "@rollup/plugin-graphql": "^2.0.4",
         "@rollup/plugin-json": "^6.1.0",
         "@types/google-apps-script": "^1.0.50",
         "@types/jest": "^29.5.12",

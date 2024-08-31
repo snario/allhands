@@ -4,8 +4,10 @@ import license from "rollup-plugin-license";
 import json from "@rollup/plugin-json";
 import copy from "rollup-plugin-copy";
 import packageJson from "./package.json" with { type: "json" };
+import graphql from "@rollup/plugin-graphql";
 
 const plugins = [
+    graphql(),
     typescript(),
     json(),
     cleanup({ comments: "none", extensions: [".ts"] }),
