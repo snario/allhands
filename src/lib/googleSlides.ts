@@ -1,4 +1,4 @@
-import { TextFormatting } from "./formatting";
+import { applyFormattingToTextStyle, TextFormatting } from "./formatting";
 
 export type ShapePositionArgs = {
     left: number;
@@ -28,26 +28,24 @@ export function removeShapesAndImages(
 ): void {
     const shapes = slide.getShapes();
     const images = slide.getImages();
+    const tables = slide.getTables();
     shapes.forEach((shape) => shape.remove());
     images.forEach((image) => image.remove());
+    tables.forEach((table) => table.remove());
 }
 
 export function insertTextBox(
     slide: GoogleAppsScript.Slides.Slide,
-    {
-        fontColor,
-        backgroundColor,
-        highlightColor,
-        bold = false,
-        italic = false,
-        alignment = SlidesApp.ContentAlignment.TOP,
-        paragraphAlignment = SlidesApp.ParagraphAlignment.START,
-        fontFamily = "Inter",
-        fontSize = 16,
-    }: TextFormatting = {},
+    formatting: TextFormatting = {},
     { left, top, width, height }: ShapePositionArgs,
     text: string,
 ) {
+    const {
+        backgroundColor,
+        alignment = SlidesApp.ContentAlignment.TOP,
+        paragraphAlignment = SlidesApp.ParagraphAlignment.START,
+    }: TextFormatting = formatting;
+
     const textBox = slide.insertShape(
         SlidesApp.ShapeType.TEXT_BOX,
         left,
@@ -58,15 +56,10 @@ export function insertTextBox(
 
     const textStyle = textBox.getText().setText(text).getTextStyle();
 
-    textStyle.setFontFamily(fontFamily);
-    textStyle.setFontSize(fontSize);
+    applyFormattingToTextStyle(textStyle, formatting);
 
-    if (bold) textStyle.setBold(true);
-    if (italic) textStyle.setItalic(true);
-    if (fontColor) textStyle.setForegroundColor(fontColor);
     if (backgroundColor) textBox.getFill().setSolidFill(backgroundColor);
     if (backgroundColor === null) textBox.getFill().setTransparent();
-    if (highlightColor) textStyle.setBackgroundColor(highlightColor);
 
     textBox.setContentAlignment(alignment);
 
@@ -114,4 +107,27 @@ export function insertImageIntoSlide(
             );
         }
     }
+}
+export function insertTableIntoSlide(
+    slide: GoogleAppsScript.Slides.Slide,
+    numRows: number,
+    numCols: number,
+    { left, top, width, height }: ShapePositionArgs,
+    textFormatting: TextFormatting = {},
+) {
+    const table = slide.insertTable(numRows, numCols, left, top, width, height);
+
+    // Apply the provided text formatting to each cell in the table
+    for (let row = 0; row < numRows; row++) {
+        for (let col = 0; col < numCols; col++) {
+            const cellElement = table.getCell(row, col);
+            const textRange = cellElement.getText();
+            applyFormattingToTextStyle(
+                textRange.getTextStyle(),
+                textFormatting,
+            );
+        }
+    }
+
+    return table;
 }

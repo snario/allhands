@@ -1,8 +1,9 @@
-import { EMPTY_STRING } from "../constants";
-import { TextFormatting } from "./formatting";
+import { EMPTY_STRING, TEXT_COLOR_PRIMARY } from "../constants";
+import { applyFormattingToTextStyle, TextFormatting } from "./formatting";
 import {
     insertImageIntoSlide,
     insertTextBox,
+    insertTableIntoSlide,
     ShapePositionArgs,
 } from "./googleSlides";
 
@@ -25,27 +26,47 @@ export function parseMarkdownIntoTextBox(
     const lines = markdown.split("\n");
     let currentTop = top;
 
+    const tableLines: string[] = [];
+    let isInTable = false;
+
     lines.forEach((line) => {
-        if (line.startsWith("### ")) {
-            processHeading(line.slice(4), textRange, defaultFontSize + 4);
-        } else if (line.startsWith("## ")) {
-            processHeading(line.slice(3), textRange, defaultFontSize + 6);
-        } else if (line.startsWith("# ")) {
-            processHeading(line.slice(2), textRange, defaultFontSize + 8);
-        } else if (line.match(/!\[(.*?)\]\((.*?)\)/)) {
-            processImage(
-                line,
-                slide,
-                currentTop,
-                left,
-                width,
-                textBox.getHeight(),
-            );
-            currentTop += 200; // Adjust based on image size
+        if (isTableLine(line)) {
+            isInTable = true;
+            tableLines.push(line);
         } else {
-            processInlineStyles(line, textRange, defaultFontSize);
+            if (isInTable) {
+                processTable(tableLines, slide, currentTop, left, width);
+                currentTop += 150; // Adjust based on table size
+                tableLines.length = 0; // Clear the tableLines array
+                isInTable = false;
+            }
+
+            if (line.startsWith("### ")) {
+                processHeading(line.slice(4), textRange, defaultFontSize + 4);
+            } else if (line.startsWith("## ")) {
+                processHeading(line.slice(3), textRange, defaultFontSize + 6);
+            } else if (line.startsWith("# ")) {
+                processHeading(line.slice(2), textRange, defaultFontSize + 8);
+            } else if (line.match(/!\[(.*?)\]\((.*?)\)/)) {
+                processImage(
+                    line,
+                    slide,
+                    currentTop,
+                    left,
+                    width,
+                    textBox.getHeight(),
+                );
+                currentTop += 200; // Adjust based on image size
+            } else {
+                processInlineStyles(line, textRange, defaultFontSize);
+                textRange.appendParagraph(""); // Ensure proper paragraph separation
+            }
         }
     });
+
+    if (isInTable) {
+        processTable(tableLines, slide, currentTop, left, width);
+    }
 
     return textBox;
 }
@@ -129,8 +150,6 @@ function processInlineStyles(
             break;
         }
     }
-
-    textRange.appendParagraph(""); // Ensure proper paragraph separation
 }
 
 function processImage(
@@ -175,4 +194,45 @@ function fetchImage(imageUrl: string) {
         );
         return null;
     }
+}
+
+function isTableLine(line: string): boolean {
+    return line.startsWith("|") && line.endsWith("|");
+}
+
+function processTable(
+    tableLines: string[],
+    slide: GoogleAppsScript.Slides.Slide,
+    top: number,
+    left: number,
+    width: number,
+) {
+    const rows = tableLines.map((line) =>
+        line
+            .slice(1, -1) // Remove leading and trailing |
+            .split("|")
+            .map((cell) => cell.trim()),
+    );
+
+    const table = insertTableIntoSlide(slide, rows.length, rows[0].length, {
+        top,
+        left,
+        width,
+        height: rows.length * 20, // Adjust height for table content
+    });
+
+    rows.forEach((row, rowIndex) => {
+        row.forEach((cell, cellIndex) => {
+            const cellElement = table.getCell(rowIndex, cellIndex);
+            cellElement.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            const textRange = cellElement.getText();
+            processInlineStyles(cell, textRange, 12);
+            applyFormattingToTextStyle(textRange.getTextStyle(), {
+                fontFamily: "Inter",
+                fontSize: 8,
+                fontColor: TEXT_COLOR_PRIMARY,
+            });
+            cellElement;
+        });
+    });
 }

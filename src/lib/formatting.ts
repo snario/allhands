@@ -49,17 +49,27 @@ export function formatDate(date: string) {
     }).format(new Date(date));
 }
 
-export function applyTextFormatting(
+export function applyFormattingToTextStyle(
     textStyle: GoogleAppsScript.Slides.TextStyle,
-    style: Pick<TextFormatting, "backgroundColor" | "fontColor" | "bold">,
+    {
+        fontColor,
+        backgroundColor,
+        highlightColor,
+        bold,
+        italic,
+        fontFamily = "Inter",
+        fontSize,
+    }: Omit<TextFormatting, "alignment" | "paragraphAlignment">,
 ) {
-    textStyle.setForegroundColor(style.fontColor || "#FFFFFF");
-    textStyle.setBold(style.bold || false);
-    if (style.backgroundColor === null) {
-        textStyle.setBackgroundColorTransparent();
-    } else if (style.backgroundColor) {
-        textStyle.setBackgroundColor(style.backgroundColor);
-    }
+    if (fontFamily) textStyle.setFontFamily(fontFamily);
+    if (fontSize) textStyle.setFontSize(fontSize);
+    if (bold) textStyle.setBold(true);
+    if (italic) textStyle.setItalic(true);
+    if (fontColor) textStyle.setForegroundColor(fontColor);
+    if (backgroundColor) textStyle.setBackgroundColor(backgroundColor);
+    if (backgroundColor === null) textStyle.setBackgroundColorTransparent();
+    if (highlightColor) textStyle.setBackgroundColor(highlightColor);
+    return textStyle;
 }
 
 export function getHealthFormatting(
@@ -220,7 +230,7 @@ export function getAdjustedLineCount(
 export default {
     rightPad,
     formatDate,
-    applyTextFormatting,
+    applyFormattingToTextStyle,
     getHealthFormatting,
     getStatusFormatting,
     getDateFormatting,

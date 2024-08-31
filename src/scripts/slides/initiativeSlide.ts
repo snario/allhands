@@ -2,7 +2,7 @@ import {
     formatDate,
     rightPad,
     getDateFormatting,
-    applyTextFormatting,
+    applyFormattingToTextStyle,
 } from "../../lib/formatting";
 import { DEFAULT_AVATAR_URL, TEXT_COLOR_SECONDARY } from "../../constants";
 import { getEmojiFromJSON } from "../../lib/emoji";
@@ -107,7 +107,7 @@ function createProjectItem(
         .getRange(textRange.asString().indexOf("\n") + 1, textRange.getLength())
         .getTextStyle();
 
-    applyTextFormatting(textStyle, {
+    applyFormattingToTextStyle(textStyle, {
         backgroundColor,
         fontColor,
         bold,

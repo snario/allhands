@@ -6,7 +6,7 @@ import {
 import { getEmojiFromJSON } from "../../lib/emoji";
 import {
     adjustFontSizeToFit,
-    applyTextFormatting,
+    applyFormattingToTextStyle,
     formatDate,
     getDateFormatting,
     getFirstName,
@@ -211,7 +211,7 @@ function buildSubtitleTextBox(
             .getText()
             .getRange(Math.max(0, start - 1), start + section.text.length);
 
-        applyTextFormatting(textRange.getTextStyle(), section.style);
+        applyFormattingToTextStyle(textRange.getTextStyle(), section.style);
     });
 
     return textBox;
