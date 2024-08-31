@@ -73,4 +73,6 @@ These are the main scripts for the project and should be the only functions that
 | -------------------------------------- | ------------------------------------------------------ |
 | [appsscript.json](src/appsscript.json) | Configuration file for the Google Apps Script project. |
 | [constants.ts](src/constants.ts)       | Defines useful constants used throughout the project.  |
+| [config.html](src/config.html)         | HTML file for the configuration dialog.                |
+| [index.ts](src/index.ts)               | Entry point for the Google Apps Script project.        |
 
