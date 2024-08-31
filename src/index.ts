@@ -2,6 +2,7 @@ import EmailScript from "./scripts/email/emailProjectLeadsWithSlides";
 import {
     createSlidesFromLinearWithProjectSlides,
     createSlidesFromLinearWithoutProjectSlides,
+    updateExistingProjectSlide,
 } from "./scripts/slides/createSlidesFromLinearInitiatives";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,6 +18,7 @@ function onOpen() {
             "Create Slides from Linear Initiatives (without Project Slides)",
             "createSlidesFromLinearWithoutProjectSlides",
         )
+        .addItem("Update Project Slide", "updateExistingProjectSlide")
         .addToUi();
 }
 
@@ -32,4 +34,5 @@ const Scripts = {
         createSlidesFromLinearWithProjectSlides,
     createSlidesFromLinearWithoutProjectSlides:
         createSlidesFromLinearWithoutProjectSlides,
+    updateExistingProjectSlide: updateExistingProjectSlide,
 };

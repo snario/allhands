@@ -27,7 +27,7 @@ export type Project = {
     url: string;
     status: { name: "Planned" | "In Progress" | "Completed" | "Canceled" };
     projectUpdates: { nodes: ProjectUpdate[] };
-    initiatives: { nodes: Initiative[] };
+    initiatives: { nodes: { id: string }[] };
     lead: User;
     health: "atRisk" | "offTrack" | "onTrack" | "unknown";
 };
@@ -146,6 +146,16 @@ export function mapProjectsToInitiatives(
     );
 }
 
+export function fetchInitiative(apiKey: string, initiativeId: string) {
+    const resp = fetchLinearData(apiKey, InitiativeQuery, { id: initiativeId });
+    return resp.data.initiative;
+}
+
+export function fetchProject(apiKey: string, projectId: string) {
+    const resp = fetchLinearData(apiKey, ProjectQuery, { id: projectId });
+    return resp.data.project;
+}
+
 export function fetchAllInitiatives(apiKey: string) {
     const data = fetchLinearData(apiKey, InitiativesQuery);
     return data.data.initiatives.nodes;
@@ -262,6 +272,62 @@ const ProjectsQuery = `
                     avatarUrl
                 }
                 health
+            }
+        }
+    }
+`;
+
+export const ProjectQuery = `
+    query GetProject($id: String!) {
+        project(id: $id) {
+            id
+            name
+            startDate
+            targetDate
+            description
+            icon
+            color
+            url
+            status {
+                name
+            }
+            projectUpdates {
+                nodes {
+                    body
+                    createdAt
+                    user {
+                        name
+                    }
+                }
+            }
+            initiatives {
+                nodes {
+                    id
+                }
+            }
+            lead {
+                name
+                email
+                avatarUrl
+            }
+            health
+        }
+    }
+`;
+
+export const InitiativeQuery = `
+    query GetInitiative($id: String!) {
+        initiative(id: $id) {
+            id
+            icon
+            color
+            name
+            description
+            targetDate
+            status
+            owner {
+                name
+                avatarUrl
             }
         }
     }

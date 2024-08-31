@@ -21,6 +21,8 @@ import InitiativeSlide from "./initiativeSlide";
 import {
     fetchAllInitiatives,
     fetchAllProjects,
+    fetchInitiative,
+    fetchProject,
     InitiativeWithProjects,
     mapProjectsToInitiatives,
 } from "../../lib/linear";
@@ -28,6 +30,7 @@ import ProjectSlide from "./projectSlide";
 import AgendaSlide from "./agendaSlide";
 import { insertTextBox, removeShapesAndImages } from "../../lib/googleSlides";
 import { TEXT_COLOR_SECONDARY } from "../../constants";
+import { init } from "../../external/secretService";
 
 export function createSlidesFromLinearWithProjectSlides() {
     createSlidesFromLinearInitiatives(true);
@@ -61,6 +64,43 @@ function createSlidesFromLinearInitiatives(withProjects = true): void {
     Logger.log("Slides created or updated successfully");
 
     saveCacheToDocumentProperties(presentation, cache);
+}
+
+export function updateExistingProjectSlide() {
+    const presentation = SlidesApp.getActivePresentation();
+
+    if (!presentation)
+        throw new Error("Active document is not a Google Slides presentation.");
+
+    const apiKey = getOrSetSecretInteractive(SlidesApp, "LINEAR_API_KEY");
+
+    const projectSlideMap: Record<string, string> = JSON.parse(
+        getDocumentProperty(`${ProjectSlide.cacheKey}_${presentation.getId()}`),
+    );
+
+    if (!projectSlideMap)
+        throw new Error("No cache found for this presentation.");
+
+    const slideId = presentation.getSelection().getCurrentPage().getObjectId();
+
+    const projectId = Object.keys(projectSlideMap).find(
+        (projectId) => slideId === projectSlideMap[projectId],
+    );
+
+    if (!projectId) {
+        throw new Error("No project slide found on the current slide.");
+    }
+
+    const project = fetchProject(apiKey, projectId);
+
+    const initiative = fetchInitiative(apiKey, project.initiatives.nodes[0].id);
+
+    const projectSlide = getOrCreateSlideWithCache(
+        presentation,
+        projectSlideMap,
+        project.id,
+    );
+    ProjectSlide.populate(projectSlide, project, initiative);
 }
 
 function fetchAndPrepareData(apiKey: string): InitiativeWithProjects[] {
