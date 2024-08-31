@@ -4,6 +4,29 @@ This repository contains scripts and configurations to streamline the creation a
 
 ## Usage
 
+This project is meant to be setup as an add-on for a Google Slides document.
+
+There are 4 scripts right now:
+
+| Script Name                     | Description                                                              |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| Email Project Leads with Slides | Emails project leads with reminders for upcoming project slides.         |
+| Create Linear Slides            | Creates slides for each project in the Linear API.                       |
+| Update Project Slide            | Updates the project slide with the latest status and health information. |
+| Show Configuration              | Shows the configuration dialog for the project.                          |
+
+### Configuration
+
+If you use the "Show Configuration" script, you can configure the project settings. This will open a dialog where you can configure the settings for the scripts. Right now there are 3 options (defined in [configSchema.json](src/configSchema.json)):
+
+| Option                    | Description                                                    |
+| ------------------------- | -------------------------------------------------------------- |
+| Include Assignee Pictures | Whether to include pictures of the assignees for each project. |
+| Include Project Slides    | Whether to include a slide for each project or skip those.     |
+| Include Agenda Slide      | Whether to include a slide for the agenda.                     |
+
+## Development
+
 This is a clasp project, which means that it's a Google Apps Script project that uses the [clasp](https://developers.google.com/apps-script/guides/clasp) tool to bundle and deploy the project as a single `.gs` file. 
 
 Setting up clasp properly requires:
@@ -28,23 +51,15 @@ npm run push
 
 This will overwrite the existing project with a new `index.gs` file.
 
-To run the scripts, go to the [Google Apps Script editor](https://script.google.com/home) and run one of the main scripts for the project like the `createSlidesFromLinearInitiatives` function. 
-
-By default, this won't work because you need to set up a secret for the `LINEAR_API_KEY` variable and the scripts check that you're on an active presentation, but you can test on the script editor if you want.
-
-## Installation
-
 To install the project, go to the [Google Apps Script editor](https://script.google.com/home) and click on the "New Deployment" button. You can then select the "Deploy as add-on" option and deploy it to your GCP or as a test deployment. You should see it show up in your Add-Ons menu of a Google Slides document.
-
-## Development
 
 ### `scripts` Directory
 
 These are the main scripts for the project and should be the only functions that are called from the Google Apps Script editor.
 
-| File                                                                                     | Description                                           |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| [email/emailProjectsToUserEmails.ts](src/scripts/email/emailProjectLeadsWithSlides.ts)     | Script to email users with slide reminders.           |
+| File                                                                                                   | Description                                      |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| [email/emailProjectsToUserEmails.ts](src/scripts/email/emailProjectLeadsWithSlides.ts)                 | Script to email users with slide reminders.      |
 | [slides/createSlidesFromLinearInitiatives.ts](src/scripts/slides/createSlidesFromLinearInitiatives.ts) | Script to create slides from Linear initiatives. |
 
 
@@ -69,10 +84,10 @@ These are the main scripts for the project and should be the only functions that
 
 ### Root Files
 
-| File                                   | Description                                            |
-| -------------------------------------- | ------------------------------------------------------ |
-| [appsscript.json](src/appsscript.json) | Configuration file for the Google Apps Script project. |
-| [constants.ts](src/constants.ts)       | Defines useful constants used throughout the project.  |
-| [config.html](src/config.html)         | HTML file for the configuration dialog.                |
-| [index.ts](src/index.ts)               | Entry point for the Google Apps Script project.        |
-
+| File                                       | Description                                            |
+| ------------------------------------------ | ------------------------------------------------------ |
+| [appsscript.json](src/appsscript.json)     | Configuration file for the Google Apps Script project. |
+| [constants.ts](src/constants.ts)           | Defines useful constants used throughout the project.  |
+| [configSchema.json](src/configSchema.json) | Schema for config to appear in script and dialog.      |
+| [config.html](src/config.html)             | HTML file for the configuration dialog.                |
+| [index.ts](src/index.ts)                   | Entry point for the Google Apps Script project.        |

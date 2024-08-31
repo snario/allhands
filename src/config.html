@@ -1,39 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+    <head>
+        <base target="_top" />
+    </head>
 
-<body>
-    <form id="configForm">
-        <label for="withAssigneeAvatars">Include Assignee Pictures:</label><br>
-        <input type="checkbox" id="withAssigneeAvatars" name="withAssigneeAvatars" value="true" <?!=withAssigneeAvatars
-            ? 'checked' : '' ?>><br><br>
+    <body>
+        <form id="configForm">
+            <div id="configFields"></div>
+            <input type="button" value="Save" onclick="saveConfig()" />
+        </form>
 
-        <label for="includeProjectSlides">Include Project Slides:</label><br>
-        <input type="checkbox" id="includeProjectSlides" name="includeProjectSlides" value="true"
-            <?!=includeProjectSlides ? 'checked' : '' ?>><br><br>
+        <script type="text/javascript">
+            async function loadConfig() {
+                await google.script.run
+                    .withSuccessHandler(renderForm)
+                    .getConfig();
+            }
 
-        <label for="includeAgendaSlide">Include Agenda Slide:</label><br>
-        <input type="checkbox" id="includeAgendaSlide" name="includeAgendaSlide" value="true" <?!=includeAgendaSlide ? 'checked'
-            : '' ?>><br><br>
+            function renderForm({ schema, configSettings }) {
+                const config = JSON.parse(configSettings || "{}");
 
-        <input type="button" value="Save" onclick="saveConfig()">
-    </form>
+                const form = document.getElementById("configFields");
 
-    <script>
-        function saveConfig() {
-            var withAssigneeAvatars = document.getElementById('withAssigneeAvatars').checked;
-            var includeProjectSlides = document.getElementById('includeProjectSlides').checked;
-            var includeAgendaSlide = document.getElementById('includeAgendaSlide').checked;
+                schema.forEach((item) => {
+                    const label = document.createElement("label");
+                    label.setAttribute("for", item.key);
+                    label.textContent = item.label + ":";
 
-            var settings = {
-                "withAssigneeAvatars": withAssigneeAvatars,
-                "includeProjectSlides": includeProjectSlides,
-                "includeAgendaSlide": includeAgendaSlide
-            };
+                    let input;
+                    if (item.type === "boolean") {
+                        input = document.createElement("input");
+                        input.type = "checkbox";
+                        input.checked = config[item.key] || false;
+                    } else {
+                        input = document.createElement("input");
+                        input.type = item.type === "string" ? "text" : "number";
+                        input.value = config[item.key] || "";
+                    }
 
-            google.script.run.saveConfigToDocumentProperties(settings);
-            google.script.host.close();
-        }
-    </script>
-</body>
+                    input.id = item.key;
+                    input.name = item.key;
 
+                    form.appendChild(label);
+                    form.appendChild(input);
+                    form.appendChild(document.createElement("br"));
+                });
+            }
+
+            async function saveConfig() {
+                const config = {};
+                const formElements =
+                    document.getElementById("configForm").elements;
+
+                for (let element of formElements) {
+                    if (element.type === "checkbox") {
+                        config[element.name] = element.checked;
+                    } else if (
+                        element.type === "text" ||
+                        element.type === "number"
+                    ) {
+                        config[element.name] =
+                            element.type === "number"
+                                ? parseFloat(element.value)
+                                : element.value;
+                    }
+                }
+
+                await google.script.run.saveConfig(JSON.stringify(config));
+                google.script.host.close();
+            }
+
+            loadConfig();
+        </script>
+    </body>
 </html>

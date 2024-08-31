@@ -1,0 +1,17 @@
+[
+    {
+        "key": "withAssigneeAvatars",
+        "label": "Include Assignee Pictures",
+        "type": "boolean"
+    },
+    {
+        "key": "includeProjectSlides",
+        "label": "Include Project Slides",
+        "type": "boolean"
+    },
+    {
+        "key": "includeAgendaSlide",
+        "label": "Include Agenda Slide",
+        "type": "boolean"
+    }
+]
