@@ -61,7 +61,7 @@ These are the main scripts for the project and should be the only functions that
 | [linear.ts](src/lib/linear.ts)                     | Queries the Linear GraphQL API and provides helper functions.     |
 | [markdown.ts](src/lib/markdown.ts)                 | Converts markdown into `Slides.TextBox`.                          |
 
-## `external` Directory
+### `external` Directory
 
 | File                                              | Description                                                                                   |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
