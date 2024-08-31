@@ -40,7 +40,7 @@ export default {
                 slide,
                 {
                     alignment: SlidesApp.ContentAlignment.MIDDLE,
-                    fontSize: 30,
+                    fontSize: 50,
                 },
                 {
                     left: 30,
@@ -83,7 +83,7 @@ export default {
         let topPosition = 190 - initiative.projects.length * 20;
 
         initiative.projects.forEach((project: Project) => {
-            createProjectItem(slide, project, topPosition);
+            createProjectItem(slide, project, topPosition, config);
             topPosition += 45;
         });
     },
@@ -93,16 +93,19 @@ function createProjectItem(
     slide: GoogleAppsScript.Slides.Slide,
     project: Project,
     topPosition: number,
+    config: { withAssigneeAvatars: boolean },
 ) {
     const projectEmoji = rightPad(getEmojiFromJSON(project.icon));
     const startDate = formatDate(project.startDate);
     const targetDate = formatDate(project.targetDate);
 
-    insertImage(
-        slide,
-        { left: 384, top: topPosition, width: 26, height: 26 },
-        project.lead?.avatarUrl || DEFAULT_AVATAR_URL,
-    );
+    if (config.withAssigneeAvatars) {
+        insertImage(
+            slide,
+            { left: 384, top: topPosition, width: 26, height: 26 },
+            project.lead?.avatarUrl || DEFAULT_AVATAR_URL,
+        );
+    }
 
     const projectTextBox = insertTextBox(
         slide,

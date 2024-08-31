@@ -85,7 +85,7 @@ export default {
         buildSubtitleTextBox(
             insertTextBox(
                 slide,
-                {},
+                { fontSize: 12 },
                 {
                     left: 50,
                     top: 82,
@@ -111,7 +111,7 @@ export default {
 
         if (config.withAssigneeAvatars) {
             // Avatar of the lead
-            const image = insertImage(
+            insertImage(
                 slide,
                 {
                     left: 560,
@@ -121,7 +121,6 @@ export default {
                 },
                 project.lead?.avatarUrl || DEFAULT_AVATAR_URL,
             );
-            image.setDescription("avatarUrl");
         }
 
         if (project.projectUpdates.nodes.length > 0) {
