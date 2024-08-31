@@ -49,18 +49,28 @@ export function formatDate(date: string) {
     }).format(new Date(date));
 }
 
+function defaultFormatting(): TextFormatting {
+    return {
+        fontFamily: "Inter",
+    };
+}
+
 export function applyFormattingToTextStyle(
     textStyle: GoogleAppsScript.Slides.TextStyle,
-    {
+    formatting: Omit<
+        TextFormatting,
+        "alignment" | "paragraphAlignment"
+    > = defaultFormatting(),
+) {
+    const {
+        fontFamily,
         fontColor,
         backgroundColor,
-        highlightColor,
+        fontSize,
         bold,
         italic,
-        fontFamily = "Inter",
-        fontSize,
-    }: Omit<TextFormatting, "alignment" | "paragraphAlignment">,
-) {
+        highlightColor,
+    } = formatting;
     if (fontFamily) textStyle.setFontFamily(fontFamily);
     if (fontSize) textStyle.setFontSize(fontSize);
     if (bold) textStyle.setBold(true);
