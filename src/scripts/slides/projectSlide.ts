@@ -15,7 +15,11 @@ import {
     rightPad,
     TextFormatting,
 } from "../../lib/formatting";
-import { insertImage, insertTextBox } from "../../lib/googleSlides";
+import {
+    insertImage,
+    insertTextBox,
+    removeShapesAndImages,
+} from "../../lib/googleSlides";
 import {
     getHealthIconUrl,
     getHealthText,
@@ -32,7 +36,10 @@ export default {
         slide: GoogleAppsScript.Slides.Slide,
         project: Project,
         initiative: Initiative,
+        config: { withAssigneeAvatars: boolean },
     ) {
+        removeShapesAndImages(slide);
+
         const initiativeEmoji = getEmojiFromJSON(initiative.icon);
 
         // Small bold title for the initiative with emoji above project title
@@ -102,17 +109,20 @@ export default {
             getHealthIconUrl(project.health),
         );
 
-        // Avatar of the lead
-        insertImage(
-            slide,
-            {
-                left: 560,
-                top: 40,
-                width: 60,
-                height: 60,
-            },
-            project.lead?.avatarUrl || DEFAULT_AVATAR_URL,
-        );
+        if (config.withAssigneeAvatars) {
+            // Avatar of the lead
+            const image = insertImage(
+                slide,
+                {
+                    left: 560,
+                    top: 40,
+                    width: 60,
+                    height: 60,
+                },
+                project.lead?.avatarUrl || DEFAULT_AVATAR_URL,
+            );
+            image.setDescription("avatarUrl");
+        }
 
         if (project.projectUpdates.nodes.length > 0) {
             const { body, createdAt, user } = project.projectUpdates.nodes[0];

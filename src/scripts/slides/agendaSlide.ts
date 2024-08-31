@@ -6,7 +6,11 @@ import {
     HIGHLIGHT_COLOR,
     rightPad,
 } from "../../lib/formatting";
-import { insertImage, insertTextBox } from "../../lib/googleSlides";
+import {
+    insertImage,
+    insertTextBox,
+    removeShapesAndImages,
+} from "../../lib/googleSlides";
 import { Initiative, isInitiativeCompleted } from "../../lib/linear";
 
 export default {
@@ -16,20 +20,25 @@ export default {
         slide: GoogleAppsScript.Slides.Slide,
         initiatives: Initiative[],
         highlightInitiativeId: string,
+        config: { withAssigneeAvatars: boolean },
     ): void {
+        removeShapesAndImages(slide);
+
         let topPosition = 50;
 
         initiatives.forEach((initiative: Initiative) => {
-            insertImage(
-                slide,
-                {
-                    left: 50,
-                    top: topPosition,
-                    width: 20,
-                    height: 20,
-                },
-                initiative.owner?.avatarUrl || DEFAULT_AVATAR_URL,
-            );
+            if (config.withAssigneeAvatars) {
+                insertImage(
+                    slide,
+                    {
+                        left: 50,
+                        top: topPosition,
+                        width: 20,
+                        height: 20,
+                    },
+                    initiative.owner?.avatarUrl || DEFAULT_AVATAR_URL,
+                );
+            }
 
             if (initiative.targetDate) {
                 insertTextBox(

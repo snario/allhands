@@ -2,6 +2,7 @@ import typescript from "rollup-plugin-typescript2";
 import cleanup from "rollup-plugin-cleanup";
 import license from "rollup-plugin-license";
 import json from "@rollup/plugin-json";
+import copy from "rollup-plugin-copy";
 import packageJson from "./package.json" with { type: "json" };
 
 const plugins = [
@@ -15,6 +16,9 @@ const plugins = [
             `Description: ${packageJson.description}`,
             `@see ${packageJson.homepage}`,
         ].join("\n"),
+    }),
+    copy({
+        targets: [{ src: "src/**/*.html", dest: "dist" }],
     }),
 ];
 

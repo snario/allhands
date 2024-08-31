@@ -146,7 +146,6 @@ export function getDateFormatting(
     completed: boolean,
 ): TextFormatting &
     Required<Pick<TextFormatting, "bold" | "fontColor" | "backgroundColor">> {
-    // Use the helper functions to determine the status of the project
     const isOverdue = Linear.isProjectOverdue(targetDate);
     const isDueSoon = Linear.isProjectDueSoon(targetDate);
 

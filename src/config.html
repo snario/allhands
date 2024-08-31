@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <form id="configForm">
+        <label for="withAssigneeAvatars">Include Assignee Pictures:</label><br>
+        <input type="checkbox" id="withAssigneeAvatars" name="withAssigneeAvatars" value="true" <?!=withAssigneeAvatars
+            ? 'checked' : '' ?>><br><br>
+
+        <label for="includeProjectSlides">Include Project Slides:</label><br>
+        <input type="checkbox" id="includeProjectSlides" name="includeProjectSlides" value="true"
+            <?!=includeProjectSlides ? 'checked' : '' ?>><br><br>
+
+        <input type="button" value="Save" onclick="saveConfig()">
+    </form>
+
+    <script>
+        function saveConfig() {
+            // Capture form data
+            var withAssigneeAvatars = document.getElementById('withAssigneeAvatars').checked;
+            var includeProjectSlides = document.getElementById('includeProjectSlides').checked;
+
+            // Create a settings object
+            var settings = {
+                "withAssigneeAvatars": withAssigneeAvatars,
+                "includeProjectSlides": includeProjectSlides,
+            };
+
+            // Pass the JSON object to the server-side script
+            google.script.run.saveConfigToDocumentProperties(settings);
+            google.script.host.close();
+        }
+    </script>
+</body>
+
+</html>

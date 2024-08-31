@@ -13,7 +13,11 @@ import {
     getHealthIconUrl,
     getStatusIconUrl,
 } from "../../lib/linear";
-import { insertImage, insertTextBox } from "../../lib/googleSlides";
+import {
+    insertImage,
+    insertTextBox,
+    removeShapesAndImages,
+} from "../../lib/googleSlides";
 
 export default {
     cacheKey: "INITIATIVE-SLIDE",
@@ -21,12 +25,32 @@ export default {
     populate(
         slide: GoogleAppsScript.Slides.Slide,
         initiative: InitiativeWithProjects,
+        config: { withAssigneeAvatars: boolean },
     ) {
-        insertImage(
-            slide,
-            { left: 35, top: 90, width: 55, height: 55 },
-            initiative.owner.avatarUrl || DEFAULT_AVATAR_URL,
-        );
+        removeShapesAndImages(slide);
+
+        if (config.withAssigneeAvatars) {
+            insertImage(
+                slide,
+                { left: 35, top: 90, width: 55, height: 55 },
+                initiative.owner.avatarUrl || DEFAULT_AVATAR_URL,
+            );
+        } else {
+            insertTextBox(
+                slide,
+                {
+                    alignment: SlidesApp.ContentAlignment.MIDDLE,
+                    fontSize: 30,
+                },
+                {
+                    left: 30,
+                    top: 90,
+                    width: 200,
+                    height: 50,
+                },
+                `${getEmojiFromJSON(initiative.icon)}`,
+            );
+        }
 
         insertTextBox(
             slide,
@@ -41,7 +65,7 @@ export default {
                 width: 350,
                 height: 50,
             },
-            `${rightPad(getEmojiFromJSON(initiative.icon))}${initiative.name}`,
+            `${config.withAssigneeAvatars ? rightPad(getEmojiFromJSON(initiative.icon)) : ""}${initiative.name}`,
         );
 
         insertTextBox(

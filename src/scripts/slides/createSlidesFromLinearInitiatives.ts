@@ -28,19 +28,10 @@ import {
 } from "../../lib/linear";
 import ProjectSlide from "./projectSlide";
 import AgendaSlide from "./agendaSlide";
-import { insertTextBox, removeShapesAndImages } from "../../lib/googleSlides";
+import { insertTextBox } from "../../lib/googleSlides";
 import { TEXT_COLOR_SECONDARY } from "../../constants";
-import { init } from "../../external/secretService";
 
-export function createSlidesFromLinearWithProjectSlides() {
-    createSlidesFromLinearInitiatives(true);
-}
-
-export function createSlidesFromLinearWithoutProjectSlides() {
-    createSlidesFromLinearInitiatives(false);
-}
-
-function createSlidesFromLinearInitiatives(withProjects = true): void {
+export function createSlidesFromLinear(): void {
     const presentation = SlidesApp.getActivePresentation();
 
     if (!presentation)
@@ -54,11 +45,13 @@ function createSlidesFromLinearInitiatives(withProjects = true): void {
 
     let cache = fetchCacheFromDocumentProperties(presentation);
 
+    const config = JSON.parse(getDocumentProperty("configSettings")) || {};
+
     cache = generateSlidesAndUpdateCache(
         presentation,
         initiatives,
         cache,
-        withProjects,
+        config,
     );
 
     Logger.log("Slides created or updated successfully");
@@ -100,7 +93,10 @@ export function updateExistingProjectSlide() {
         projectSlideMap,
         project.id,
     );
-    ProjectSlide.populate(projectSlide, project, initiative);
+
+    const config = JSON.parse(getDocumentProperty("configSettings"));
+
+    ProjectSlide.populate(projectSlide, project, initiative, config);
 }
 
 function fetchAndPrepareData(apiKey: string): InitiativeWithProjects[] {
@@ -118,7 +114,10 @@ function generateSlidesAndUpdateCache(
         agendaSlideMap: Record<string, string>;
         initiativeSlideMap: Record<string, string>;
     },
-    withProjects: boolean,
+    config: {
+        includeProjectSlides: boolean;
+        withAssigneeAvatars: boolean;
+    },
 ) {
     const { projectSlideMap, agendaSlideMap, initiativeSlideMap } = cache;
 
@@ -128,22 +127,28 @@ function generateSlidesAndUpdateCache(
             agendaSlideMap,
             initiative.id,
         );
-        AgendaSlide.populate(agendaSlide, initiatives, initiative.id);
+        AgendaSlide.populate(agendaSlide, initiatives, initiative.id, config);
 
         const initiativeSlide = getOrCreateSlideWithCache(
             presentation,
             initiativeSlideMap,
             initiative.id,
         );
-        InitiativeSlide.populate(initiativeSlide, initiative);
-        if (withProjects) {
+        InitiativeSlide.populate(initiativeSlide, initiative, config);
+
+        if (config.includeProjectSlides) {
             initiative.projects.forEach((project) => {
                 const projectSlide = getOrCreateSlideWithCache(
                     presentation,
                     projectSlideMap,
                     project.id,
                 );
-                ProjectSlide.populate(projectSlide, project, initiative);
+                ProjectSlide.populate(
+                    projectSlide,
+                    project,
+                    initiative,
+                    config,
+                );
             });
         }
     });
@@ -211,7 +216,6 @@ export function getOrCreateSlideWithCache(
 
     if (cache[id]) {
         slide = presentation.getSlideById(cache[id]);
-        removeShapesAndImages(slide);
     } else {
         slide = presentation.appendSlide();
         cache[id] = slide.getObjectId();
