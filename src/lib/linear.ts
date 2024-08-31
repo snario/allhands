@@ -142,8 +142,7 @@ export function mapProjectsToInitiatives(
     });
 
     return Object.values(tmp).sort(
-        (a, b) =>
-            new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime(),
+        (a, b) => Date.parse(a.targetDate) - Date.parse(b.targetDate),
     );
 }
 
