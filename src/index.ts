@@ -3,7 +3,7 @@ import {
     getDocumentProperty,
     saveDocumentProperty,
 } from "./lib/googleAppsScript";
-import EmailScript from "./scripts/email/emailProjectLeadsWithSlides";
+import { emailProjectLeadsWithSlides } from "./scripts/email/emailProjectLeadsWithSlides";
 import {
     createSlidesFromLinear,
     updateExistingProjectSlide,
@@ -27,7 +27,7 @@ function onInstall() {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Scripts = {
-    emailProjectsToUserEmails: EmailScript,
+    emailProjectsToUserEmails: emailProjectLeadsWithSlides,
     createSlidesFromLinear: createSlidesFromLinear,
     updateExistingProjectSlide: updateExistingProjectSlide,
 };

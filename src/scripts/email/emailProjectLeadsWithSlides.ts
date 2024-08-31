@@ -25,7 +25,7 @@ import ProjectSlide from "../slides/projectSlide";
 import { getSlideUrl } from "../../lib/googleSlides";
 import { formatDate } from "../../lib/formatting";
 
-export default function emailProjectLeadsWithSlides(): void {
+export function emailProjectLeadsWithSlides(): void {
     const presentation = SlidesApp.getActivePresentation();
 
     if (!presentation)
