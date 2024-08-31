@@ -17,12 +17,12 @@
                     .getConfig();
             }
 
-            function renderForm({ schema, configSettings }) {
+            function renderForm({ configSchema, configSettings }) {
                 const config = JSON.parse(configSettings || "{}");
 
                 const form = document.getElementById("configFields");
 
-                schema.forEach((item) => {
+                configSchema.forEach((item) => {
                     const label = document.createElement("label");
                     label.setAttribute("for", item.key);
                     label.textContent = item.label + ":";
