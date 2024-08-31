@@ -116,18 +116,26 @@ function generateSlidesAndUpdateCache(
     },
     config: {
         includeProjectSlides: boolean;
+        includeAgendaSlide: boolean;
         withAssigneeAvatars: boolean;
     },
 ) {
     const { projectSlideMap, agendaSlideMap, initiativeSlideMap } = cache;
 
     initiatives.forEach((initiative) => {
-        const agendaSlide = getOrCreateSlideWithCache(
-            presentation,
-            agendaSlideMap,
-            initiative.id,
-        );
-        AgendaSlide.populate(agendaSlide, initiatives, initiative.id, config);
+        if (config.includeAgendaSlide) {
+            const agendaSlide = getOrCreateSlideWithCache(
+                presentation,
+                agendaSlideMap,
+                initiative.id,
+            );
+            AgendaSlide.populate(
+                agendaSlide,
+                initiatives,
+                initiative.id,
+                config,
+            );
+        }
 
         const initiativeSlide = getOrCreateSlideWithCache(
             presentation,

@@ -38,8 +38,9 @@ function showConfigDialog() {
     const html = HtmlService.createTemplateFromFile("config");
 
     // Pass the settings to the template
-    html.withAssigneeAvatars = settings.withAssigneeAvatars === "true";
-    html.includeProjectSlides = settings.includeProjectSlides === "true";
+    html.withAssigneeAvatars = settings.withAssigneeAvatars;
+    html.includeProjectSlides = settings.includeProjectSlides;
+    html.includeAgendaSlide = settings.includeAgendaSlide;
 
     const output = html.evaluate().setWidth(400).setHeight(300);
     SlidesApp.getUi().showModalDialog(output, "Configuration Settings");
@@ -49,6 +50,7 @@ function showConfigDialog() {
 function saveConfigToDocumentProperties(settings: {
     withAssigneeAvatars: string;
     includeProjectSlides: string;
+    includeAgendaSlide: string; // new property
 }) {
     saveDocumentProperty("configSettings", JSON.stringify(settings));
 }

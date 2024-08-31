@@ -11,22 +11,25 @@
         <input type="checkbox" id="includeProjectSlides" name="includeProjectSlides" value="true"
             <?!=includeProjectSlides ? 'checked' : '' ?>><br><br>
 
+        <label for="includeAgendaSlide">Include Agenda Slide:</label><br>
+        <input type="checkbox" id="includeAgendaSlide" name="includeAgendaSlide" value="true" <?!=includeAgendaSlide ? 'checked'
+            : '' ?>><br><br>
+
         <input type="button" value="Save" onclick="saveConfig()">
     </form>
 
     <script>
         function saveConfig() {
-            // Capture form data
             var withAssigneeAvatars = document.getElementById('withAssigneeAvatars').checked;
             var includeProjectSlides = document.getElementById('includeProjectSlides').checked;
+            var includeAgendaSlide = document.getElementById('includeAgendaSlide').checked;
 
-            // Create a settings object
             var settings = {
                 "withAssigneeAvatars": withAssigneeAvatars,
                 "includeProjectSlides": includeProjectSlides,
+                "includeAgendaSlide": includeAgendaSlide
             };
 
-            // Pass the JSON object to the server-side script
             google.script.run.saveConfigToDocumentProperties(settings);
             google.script.host.close();
         }
