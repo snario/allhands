@@ -5,7 +5,8 @@
     "runtimeVersion": "V8",
     "urlFetchWhitelist": [
         "https://api.linear.app/graphql",
-        "https://liamhorne.com/"
+        "https://liamhorne.com/",
+        "https://uploads.linear.app/"
     ],
     "oauthScopes": [
         "https://www.googleapis.com/auth/script.send_mail",
