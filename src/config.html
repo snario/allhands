@@ -11,36 +11,12 @@
         </form>
 
         <script type="text/javascript">
-            async function loadConfig() {
-                await google.script.run
-                    .withSuccessHandler(renderForm)
-                    .getConfig();
-            }
-
             function renderForm({ configSchema, configSettings }) {
                 const config = JSON.parse(configSettings || "{}");
-
                 const form = document.getElementById("configFields");
-
                 configSchema.forEach((item) => {
-                    const label = document.createElement("label");
-                    label.setAttribute("for", item.key);
-                    label.textContent = item.label + ":";
-
-                    let input;
-                    if (item.type === "boolean") {
-                        input = document.createElement("input");
-                        input.type = "checkbox";
-                        input.checked = config[item.key] || false;
-                    } else {
-                        input = document.createElement("input");
-                        input.type = item.type === "string" ? "text" : "number";
-                        input.value = config[item.key] || "";
-                    }
-
-                    input.id = item.key;
-                    input.name = item.key;
-
+                    const label = createLabel(item);
+                    const input = createInput(item, config);
                     form.appendChild(label);
                     form.appendChild(input);
                     form.appendChild(document.createElement("br"));
@@ -49,28 +25,60 @@
 
             async function saveConfig() {
                 const config = {};
-                const formElements =
-                    document.getElementById("configForm").elements;
-
-                for (let element of formElements) {
-                    if (element.type === "checkbox") {
-                        config[element.name] = element.checked;
-                    } else if (
-                        element.type === "text" ||
-                        element.type === "number"
-                    ) {
-                        config[element.name] =
-                            element.type === "number"
-                                ? parseFloat(element.value)
-                                : element.value;
+                const { elements } = document.getElementById("configForm");
+                for (let element of elements) {
+                    switch (element.type) {
+                        case "checkbox":
+                            config[element.name] = Boolean(element.checked);
+                            break;
+                        case "text":
+                            config[element.name] = String(element.value);
+                            break;
+                        case "number":
+                            config[element.name] = Number(element.value);
+                            break;
                     }
                 }
-
                 await google.script.run.saveConfig(JSON.stringify(config));
                 google.script.host.close();
             }
 
+            async function loadConfig() {
+                await google.script.run
+                    .withSuccessHandler(renderForm)
+                    .getConfig();
+            }
+
             loadConfig();
+
+            function createLabel(item) {
+                const label = document.createElement("label");
+                label.setAttribute("for", item.key);
+                label.textContent = item.label + ":";
+                return label;
+            }
+
+            function createInput(item, config) {
+                const input = document.createElement("input");
+                input.id = item.key;
+                input.name = item.key;
+                switch (item.type) {
+                    case "boolean":
+                        input.type = "checkbox";
+                        input.checked = config[item.key] || false;
+                        return input;
+                    case "string":
+                        input.type = "text";
+                        input.value = config[item.key] || "";
+                        return input;
+                    case "number":
+                        input.type = "number";
+                        input.value = config[item.key] || "";
+                        return input;
+                    default:
+                        throw new Error("Unsupported input type: " + item.type);
+                }
+            }
         </script>
     </body>
 </html>
