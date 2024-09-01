@@ -80,32 +80,20 @@ export function insertImageIntoSlide(
     textBoxHeight: number,
     width: number,
 ) {
-    try {
-        const image = slide.insertImage(
-            imageBlob,
-            left,
-            currentTop + textBoxHeight + 10,
-            width,
-            textBoxHeight,
-        );
-        image.setTitle(altText);
+    const image = slide.insertImage(
+        imageBlob,
+        left,
+        currentTop + textBoxHeight + 10,
+        width,
+        textBoxHeight,
+    );
+    image.setTitle(altText);
 
-        // Adjust the image size if necessary
-        if (image.getWidth() > width) {
-            const ratio = width / image.getWidth();
-            image.setWidth(width);
-            image.setHeight(image.getHeight() * ratio);
-        }
-    } catch (error) {
-        if (error instanceof Error) {
-            Logger.log(
-                "Failed to insert image into slide\nError: " + error.message,
-            );
-        } else {
-            Logger.log(
-                "Failed to insert image into slide\nUnknown error occurred",
-            );
-        }
+    // Adjust the image size if necessary
+    if (image.getWidth() > width) {
+        const ratio = width / image.getWidth();
+        image.setWidth(width);
+        image.setHeight(image.getHeight() * ratio);
     }
 }
 export function insertTableIntoSlide(
