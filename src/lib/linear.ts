@@ -117,6 +117,27 @@ export function getStatusIconUrl(health: Initiative["status"]) {
     }
 }
 
+export const countProjectHealth = (initiative: InitiativeWithProjects) =>
+    initiative.projects.reduce(
+        (statusCount, project) => {
+            switch (project.health) {
+                case "onTrack":
+                    statusCount.onTrack++;
+                    break;
+                case "atRisk":
+                    statusCount.atRisk++;
+                    break;
+                case "offTrack":
+                    statusCount.offTrack++;
+                    break;
+                default:
+                    statusCount.unknown++;
+            }
+            return statusCount;
+        },
+        { onTrack: 0, atRisk: 0, offTrack: 0, unknown: 0 },
+    );
+
 export function isProjectCompleted(project: Project) {
     return project.status.name === "Completed";
 }
