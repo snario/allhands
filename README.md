@@ -1,69 +1,91 @@
 # Allhands Project
 
-This repository contains scripts and configurations to streamline the creation and management of project slides from Linear initiatives, and to communicate updates via email. Below is a description of each file in the repository:
+This repository contains scripts and configurations to streamline the creation and management of project slides from Linear initiatives and communicate updates via email. It's designed to integrate seamlessly with Google Slides.
+
+## Table of Contents
+
+- [Allhands Project](#allhands-project)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+    - [Scripts Overview](#scripts-overview)
+    - [Configuration](#configuration)
+  - [Development](#development)
+    - [Setting Up](#setting-up)
+    - [Building and Deploying](#building-and-deploying)
+    - [Directory Structure](#directory-structure)
+      - [`scripts` Directory](#scripts-directory)
+      - [`lib` Directory](#lib-directory)
+      - [`external` Directory](#external-directory)
+      - [Root Files](#root-files)
 
 ## Usage
 
-This project is meant to be setup as an add-on for a Google Slides document.
+This project is designed to be set up as an add-on for a Google Slides document.
 
-There are 4 scripts right now:
+### Scripts Overview
+
+Currently, there are 4 main scripts:
 
 | Script Name                     | Description                                                              |
 | ------------------------------- | ------------------------------------------------------------------------ |
 | Email Project Leads with Slides | Emails project leads with reminders for upcoming project slides.         |
 | Create Linear Slides            | Creates slides for each project in the Linear API.                       |
 | Update Project Slide            | Updates the project slide with the latest status and health information. |
-| Show Configuration              | Shows the configuration dialog for the project.                          |
+| Show Configuration              | Displays the configuration dialog for project settings.                  |
 
 ### Configuration
 
-If you use the "Show Configuration" script, you can configure the project settings. This will open a dialog where you can configure the settings for the scripts. Right now there are 3 options (defined in [configSchema.json](src/configSchema.json)):
+To configure project settings, use the "Show Configuration" script. This opens a dialog where you can set the following options (defined in [configSchema.json](src/configSchema.json)):
 
 | Option                    | Description                                                    |
 | ------------------------- | -------------------------------------------------------------- |
-| Include Assignee Pictures | Whether to include pictures of the assignees for each project. |
-| Include Project Slides    | Whether to include a slide for each project or skip those.     |
-| Include Agenda Slide      | Whether to include a slide for the agenda.                     |
+| Include Assignee Pictures | Include pictures of the assignees for each project.            |
+| Include Project Slides    | Include or skip slides for each project.                       |
+| Include Agenda Slide      | Include a slide for the agenda.                                |
 
 ## Development
 
-This is a clasp project, which means that it's a Google Apps Script project that uses the [clasp](https://developers.google.com/apps-script/guides/clasp) tool to bundle and deploy the project as a single `.gs` file. 
+This is a `clasp` project, which means it's a Google Apps Script project that uses the [clasp](https://developers.google.com/apps-script/guides/clasp) tool to bundle and deploy the project as a single `.gs` file.
 
-Setting up clasp properly requires:
-- Creating a Google Apps Script project ([click here](https://script.google.com/home/start))
-- Adding the project ID to a `.clasp.json` file
-- Enabling the Google Apps Script API ([click here](https://script.google.com/home/usersettings))
-- Logging into clasp with `clasp login` (and storing `.clasrpc.json`)
+### Setting Up
 
-We can build the project file by running the following command:
+1. **Create a Google Apps Script Project:** [Click here](https://script.google.com/home/start) to create a new project.
+2. **Add Project ID to `.clasp.json`:** Include your project ID in the `.clasp.json` file.
+3. **Enable Google Apps Script API:** [Click here](https://script.google.com/home/usersettings) to enable the API.
+4. **Login to Clasp:** Run `clasp login` to authenticate (`.clasprc.json` should be stored).
 
-```sh
-npm run build
-```
+### Building and Deploying
 
-This will create a `dist` directory with an `index.js` and `appsscript.json` file.
+1. **Build the Project:** Run the following command to build the project:
+    ```sh
+    npm run build
+    ```
+    This creates a `dist` directory with `index.js` and `appsscript.json`.
 
-Then, if we run the push command, we can deploy this file to Google Apps Script:
+2. **Deploy the Project:** Push the built files to Google Apps Script:
+    ```sh
+    npm run push
+    ```
+    This overwrites the existing project with a new `index.gs` file.
 
-```sh
-npm run push
-```
+3. **Install the Project:**
+   - Go to the [Google Apps Script editor](https://script.google.com/home).
+   - Click the “New Deployment” button.
+   - Select “Deploy as add-on” and choose between deploying to your GCP or as a test deployment.
+   - The project should appear in the Add-Ons menu of a Google Slides document.
 
-This will overwrite the existing project with a new `index.gs` file.
+### Directory Structure
 
-To install the project, go to the [Google Apps Script editor](https://script.google.com/home) and click on the "New Deployment" button. You can then select the "Deploy as add-on" option and deploy it to your GCP or as a test deployment. You should see it show up in your Add-Ons menu of a Google Slides document.
+#### `scripts` Directory
 
-### `scripts` Directory
-
-These are the main scripts for the project and should be the only functions that are called from the Google Apps Script editor.
+These are the main scripts for the project and should be the only functions called from the Google Apps Script editor.
 
 | File                                                                                                   | Description                                      |
 | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| [email/emailProjectsToUserEmails.ts](src/scripts/email/emailProjectLeadsWithSlides.ts)                 | Script to email users with slide reminders.      |
-| [slides/createSlidesFromLinearInitiatives.ts](src/scripts/slides/createSlidesFromLinearInitiatives.ts) | Script to create slides from Linear initiatives. |
+| [email/emailProjectsToUserEmails.ts](src/scripts/email/emailProjectLeadsWithSlides.ts)                 | Emails users with slide reminders.               |
+| [slides/createSlidesFromLinearInitiatives.ts](src/scripts/slides/createSlidesFromLinearInitiatives.ts) | Creates slides from Linear initiatives.          |
 
-
-### `lib` Directory
+#### `lib` Directory
 
 | File                                               | Description                                                       |
 | -------------------------------------------------- | ----------------------------------------------------------------- |
@@ -76,13 +98,13 @@ These are the main scripts for the project and should be the only functions that
 | [linear.ts](src/lib/linear.ts)                     | Queries the Linear GraphQL API and provides helper functions.     |
 | [markdown.ts](src/lib/markdown.ts)                 | Converts markdown into `Slides.TextBox`.                          |
 
-### `external` Directory
+#### `external` Directory
 
 | File                                              | Description                                                                                   |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | [secretService.ts](src/external/secretService.ts) | Source code for the [Secret Service](https://github.com/dataful-tech/secret-service) library. |
 
-### Root Files
+#### Root Files
 
 | File                                       | Description                                            |
 | ------------------------------------------ | ------------------------------------------------------ |
