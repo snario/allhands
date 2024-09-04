@@ -135,39 +135,46 @@ function buildStatusTextBox(
         unknown: number;
     },
 ) {
-    const emtpySpace = { text: "   ", style: { backgroundColor: null } };
-    const sections: ({ text: string; style: TextFormatting } | false)[] = [
-        statusCount.onTrack > 0 && {
-            text: `🟢 ${statusCount.onTrack}`,
-            style: {
-                backgroundColor: BACKGROUND_COLOR_ON_TRACK,
-                fontColor: FONT_COLOR_ON_TRACK,
-            },
-        },
-        statusCount.onTrack > 0 && emtpySpace,
-        statusCount.atRisk > 0 && {
-            text: `🟡 ${statusCount.atRisk}`,
-            style: {
-                backgroundColor: BACKGROUND_COLOR_AT_RISK,
-                fontColor: FONT_COLOR_AT_RISK,
-            },
-        },
-        statusCount.atRisk > 0 && emtpySpace,
-        statusCount.offTrack > 0 && {
-            text: `🔴 ${statusCount.offTrack}`,
-            style: {
-                backgroundColor: BACKGROUND_COLOR_OFF_TRACK,
-                fontColor: FONT_COLOR_OFF_TRACK,
-            },
-        },
-        statusCount.offTrack > 0 && emtpySpace,
-        statusCount.unknown > 0 && {
-            text: `⚫ ${statusCount.unknown}`,
-            style: {
-                backgroundColor: BACKGROUND_COLOR_UNKNOWN_HEALTH,
-                fontColor: FONT_COLOR_UNKNOWN_HEALTH,
-            },
-        },
+    const emptySection = { text: "   ", style: { backgroundColor: null } };
+
+    function createSection(
+        statusCountType: number,
+        emoji: string,
+        backgroundColor: `#${string}`,
+        fontColor: `#${string}`,
+    ): ({ text: string; style: TextFormatting } | false)[] {
+        const section = {
+            text: `${emoji} ${statusCountType}`,
+            style: { backgroundColor, fontColor },
+        };
+        return statusCountType > 0 ? [section, emptySection] : [];
+    }
+
+    const sections = [
+        ...createSection(
+            statusCount.onTrack,
+            "🟢",
+            BACKGROUND_COLOR_ON_TRACK,
+            FONT_COLOR_ON_TRACK,
+        ),
+        ...createSection(
+            statusCount.atRisk,
+            "🟡",
+            BACKGROUND_COLOR_AT_RISK,
+            FONT_COLOR_AT_RISK,
+        ),
+        ...createSection(
+            statusCount.offTrack,
+            "🔴",
+            BACKGROUND_COLOR_OFF_TRACK,
+            FONT_COLOR_OFF_TRACK,
+        ),
+        ...createSection(
+            statusCount.unknown,
+            "⚫",
+            BACKGROUND_COLOR_UNKNOWN_HEALTH,
+            FONT_COLOR_UNKNOWN_HEALTH,
+        ),
     ];
 
     textbox.getText().clear();
