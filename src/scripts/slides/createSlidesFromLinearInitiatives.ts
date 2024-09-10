@@ -224,7 +224,9 @@ export function getOrCreateSlideWithCache(
 
     if (cache[id]) {
         slide = presentation.getSlideById(cache[id]);
-    } else {
+    }
+
+    if (!slide) {
         slide = presentation.appendSlide();
         cache[id] = slide.getObjectId();
     }
