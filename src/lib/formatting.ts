@@ -71,6 +71,7 @@ export function applyFormattingToTextStyle(
         italic,
         highlightColor,
     } = formatting;
+    if (!textStyle) return textStyle;
     if (fontFamily) textStyle.setFontFamily(fontFamily);
     if (fontSize) textStyle.setFontSize(fontSize);
     if (bold) textStyle.setBold(true);

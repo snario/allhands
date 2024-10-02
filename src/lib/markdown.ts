@@ -127,12 +127,14 @@ function processInlineStyles(
             const styledText = textRange.appendText(match[1]);
             const textStyle = styledText.getTextStyle();
 
-            if (pattern.style === "bold") {
-                textStyle.setBold(true);
-            } else if (pattern.style === "italic") {
-                textStyle.setItalic(true);
-            } else if (pattern.style === "link") {
-                textStyle.setLinkUrl(match[2]);
+            if (textStyle) {
+                if (pattern.style === "bold") {
+                    textStyle.setBold(true);
+                } else if (pattern.style === "italic") {
+                    textStyle.setItalic(true);
+                } else if (pattern.style === "link") {
+                    textStyle.setLinkUrl(match[2]);
+                }
             }
 
             // Reset the text style after the match
