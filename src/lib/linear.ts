@@ -181,7 +181,10 @@ export function fetchProject(apiKey: string, projectId: string) {
 
 export function fetchAllInitiatives(apiKey: string) {
     const data = fetchLinearData(apiKey, "GetInitiatives");
-    return data.data.initiatives.nodes;
+    return data.data.initiatives.nodes.filter(
+        (node: { status: string }) =>
+            node.status === "Active" || node.status === "Completed",
+    );
 }
 
 export function fetchAllProjects(apiKey: string) {
