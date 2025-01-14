@@ -49,7 +49,7 @@ fragment ProjectFields on Project {
 query GetInitiatives {
     initiatives(
         filter: {
-            status: { in: ["Active", "Completed"] }
+            status: { in: ["Active"] }
         }
     ) {
         nodes {
