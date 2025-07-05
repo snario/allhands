@@ -110,10 +110,12 @@ export function insertTableIntoSlide(
         for (let col = 0; col < numCols; col++) {
             const cellElement = table.getCell(row, col);
             const textRange = cellElement.getText();
-            applyFormattingToTextStyle(
-                textRange.getTextStyle(),
-                textFormatting,
-            );
+            if (textRange) {
+                applyFormattingToTextStyle(
+                    textRange.getTextStyle(),
+                    textFormatting,
+                );
+            }
         }
     }
 

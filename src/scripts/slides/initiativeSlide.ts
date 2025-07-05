@@ -3,8 +3,10 @@ import {
     rightPad,
     getDateFormatting,
     applyFormattingToTextStyle,
+    TextFormatting,
+    getHealthFormatting,
 } from "../../lib/formatting";
-import { DEFAULT_AVATAR_URL, TEXT_COLOR_SECONDARY } from "../../constants";
+import { DEFAULT_AVATAR_URL, EMPTY_STRING, TEXT_COLOR_SECONDARY } from "../../constants";
 import { getEmojiFromJSON } from "../../lib/emoji";
 import {
     isProjectCompleted,
@@ -12,6 +14,8 @@ import {
     InitiativeWithProjects,
     getHealthIconUrl,
     getStatusIconUrl,
+    isInitiativeCompleted,
+    getHealthText,
 } from "../../lib/linear";
 import {
     insertImage,
@@ -68,6 +72,22 @@ export default {
             `${config.withAssigneeAvatars ? rightPad(getEmojiFromJSON(initiative.icon)) : ""}${initiative.name}`,
         );
 
+        // Date | Health
+        buildSubtitleTextBox(
+            insertTextBox(
+                slide,
+                { fontSize: 14 },
+                {
+                    left: 30,
+                    top: 205,
+                    width: 350,
+                    height: 24,
+                },
+                EMPTY_STRING
+            ),
+            initiative
+        );
+
         insertTextBox(
             slide,
             { fontColor: TEXT_COLOR_SECONDARY, fontSize: 14 },
@@ -77,7 +97,7 @@ export default {
                 width: 350,
                 height: 50,
             },
-            `${initiative.description || "No description"}\n\nTimeline -> ${formatDate(initiative.targetDate)}`,
+            `${initiative.description || "No description"}`,
         );
 
         let topPosition = 190 - initiative.projects.length * 20;
@@ -88,6 +108,57 @@ export default {
         });
     },
 };
+
+type SubtitleSectionStyle = Pick<
+    TextFormatting,
+    "backgroundColor" | "fontColor" | "bold"
+>;
+
+function buildSubtitleTextBox(
+    textBox: GoogleAppsScript.Slides.Shape,
+    initiative: InitiativeWithProjects,
+) {
+    const separator = " | ";
+    const separatorStyle: SubtitleSectionStyle = {
+        backgroundColor: null,
+        fontColor: TEXT_COLOR_SECONDARY,
+    };
+
+    const sections: { text: string; style: TextFormatting }[] = [];
+
+    if (initiative.targetDate) {
+        sections.push(
+            {
+                text: `Target -> ${formatDate(initiative.targetDate)}`,
+                style: getDateFormatting(initiative.targetDate, isInitiativeCompleted(initiative)),
+            },
+            { text: separator, style: separatorStyle }
+        );
+    }
+
+    sections.push(
+        {
+            text: getHealthText(initiative.health),
+            style: getHealthFormatting(initiative.health)
+        }
+    );
+
+    textBox.getText().clear();
+
+    sections.forEach((section) => {
+        const start = textBox.getText().getLength();
+
+        textBox.getText().appendText(section.text);
+
+        const textRange = textBox
+            .getText()
+            .getRange(Math.max(0, start - 1), start + section.text.length);
+
+        applyFormattingToTextStyle(textRange.getTextStyle(), section.style);
+    });
+
+    return textBox;
+}
 
 function createProjectItem(
     slide: GoogleAppsScript.Slides.Slide,
