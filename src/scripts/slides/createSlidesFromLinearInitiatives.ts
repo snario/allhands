@@ -45,7 +45,8 @@ export function createSlidesFromLinear(): void {
 
     let cache = fetchCacheFromDocumentProperties(presentation);
 
-    const config = JSON.parse(getDocumentProperty("configSettings")) || {};
+    const configSettings = getDocumentProperty("configSettings");
+    const config = configSettings ? JSON.parse(configSettings) : {};
 
     cache = generateSlidesAndUpdateCache(
         presentation,
@@ -67,9 +68,8 @@ export function updateExistingProjectSlide() {
 
     const apiKey = getOrSetSecretInteractive(SlidesApp, "LINEAR_API_KEY");
 
-    const projectSlideMap: Record<string, string> = JSON.parse(
-        getDocumentProperty(`${ProjectSlide.cacheKey}_${presentation.getId()}`),
-    );
+    const projectSlideMapData = getDocumentProperty(`${ProjectSlide.cacheKey}_${presentation.getId()}`);
+    const projectSlideMap: Record<string, string> = projectSlideMapData ? JSON.parse(projectSlideMapData) : {};
 
     if (!projectSlideMap)
         throw new Error("No cache found for this presentation.");
@@ -94,7 +94,8 @@ export function updateExistingProjectSlide() {
         project.id,
     );
 
-    const config = JSON.parse(getDocumentProperty("configSettings"));
+    const configSettings = getDocumentProperty("configSettings");
+    const config = configSettings ? JSON.parse(configSettings) : {};
 
     ProjectSlide.populate(projectSlide, project, initiative, config);
 }
@@ -167,25 +168,14 @@ function generateSlidesAndUpdateCache(
 function fetchCacheFromDocumentProperties(
     presentation: GoogleAppsScript.Slides.Presentation,
 ) {
+    const projectSlideMapData = getDocumentProperty(`${ProjectSlide.cacheKey}_${presentation.getId()}`);
+    const agendaSlideMapData = getDocumentProperty(`${AgendaSlide.cacheKey}_${presentation.getId()}`);
+    const initiativeSlideMapData = getDocumentProperty(`${InitiativeSlide.cacheKey}_${presentation.getId()}`);
+    
     return {
-        projectSlideMap:
-            JSON.parse(
-                getDocumentProperty(
-                    `${ProjectSlide.cacheKey}_${presentation.getId()}`,
-                ),
-            ) || {},
-        agendaSlideMap:
-            JSON.parse(
-                getDocumentProperty(
-                    `${AgendaSlide.cacheKey}_${presentation.getId()}`,
-                ),
-            ) || {},
-        initiativeSlideMap:
-            JSON.parse(
-                getDocumentProperty(
-                    `${InitiativeSlide.cacheKey}_${presentation.getId()}`,
-                ),
-            ) || {},
+        projectSlideMap: projectSlideMapData ? JSON.parse(projectSlideMapData) : {},
+        agendaSlideMap: agendaSlideMapData ? JSON.parse(agendaSlideMapData) : {},
+        initiativeSlideMap: initiativeSlideMapData ? JSON.parse(initiativeSlideMapData) : {},
     };
 }
 

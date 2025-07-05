@@ -221,20 +221,43 @@ export function fetchLinearData(
     operationName: string,
     variables = {},
 ) {
-    const response = UrlFetchApp.fetch(LINEAR_API_URL, {
-        method: "post",
-        contentType: "application/json",
-        headers: {
-            Authorization: apiKey,
-            "public-file-urls-expire-in": "60", // 1 min expiry
-        },
-        payload: JSON.stringify({
-            query: schema.loc.source.body,
-            operationName,
-            variables,
-        }),
-    });
-    return JSON.parse(response.getContentText());
+    try {
+        const response = UrlFetchApp.fetch(LINEAR_API_URL, {
+            method: "post",
+            contentType: "application/json",
+            headers: {
+                Authorization: apiKey,
+                "public-file-urls-expire-in": "60", // 1 min expiry
+            },
+            payload: JSON.stringify({
+                query: schema.loc.source.body,
+                operationName,
+                variables,
+            }),
+        });
+
+        if (response.getResponseCode() !== 200) {
+            throw new Error(
+                `Linear API request failed: ${response.getResponseCode()}`,
+            );
+        }
+
+        const responseText = response.getContentText();
+        const data = JSON.parse(responseText);
+
+        if (data.errors && data.errors.length > 0) {
+            throw new Error(
+                `Linear API GraphQL error: ${data.errors[0].message}`,
+            );
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Linear API request failed:", error);
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
+        throw new Error(`Failed to fetch Linear data: ${errorMessage}`);
+    }
 }
 
 export default {
