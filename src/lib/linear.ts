@@ -5,6 +5,7 @@ export type Initiative = {
     name: string;
     description: string;
     targetDate: string; // 2022-01-01
+    health: "atRisk" | "offTrack" | "onTrack" | "unknown";
     status: "Planned" | "In Progress" | "Completed" | "Canceled";
     icon: string;
     color: string;
@@ -182,8 +183,11 @@ export function fetchProject(apiKey: string, projectId: string) {
 export function fetchAllInitiatives(apiKey: string) {
     const data = fetchLinearData(apiKey, "GetInitiatives");
     return data.data.initiatives.nodes.filter(
-        (node: { status: string }) =>
-            node.status === "Active" || node.status === "Completed",
+        (node: { status: string; targetDate: string }) =>
+            node.status === "Active" ||
+            (node.status === "Completed" &&
+                new Date(node.targetDate) >=
+                    new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)),
     );
 }
 

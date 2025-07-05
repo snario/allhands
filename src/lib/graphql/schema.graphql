@@ -6,6 +6,7 @@ fragment InitiativeFields on Initiative {
     description
     targetDate
     status
+    health
     owner {
         name
         avatarUrl
