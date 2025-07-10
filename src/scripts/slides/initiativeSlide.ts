@@ -37,7 +37,7 @@ export default {
             insertImage(
                 slide,
                 { left: 35, top: 90, width: 55, height: 55 },
-                initiative.owner.avatarUrl || DEFAULT_AVATAR_URL,
+                initiative.owner?.avatarUrl || DEFAULT_AVATAR_URL,
             );
         } else {
             insertTextBox(
