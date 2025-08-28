@@ -23,7 +23,7 @@ import {
 import {
     getHealthIconUrl,
     getHealthText,
-    Initiative,
+    getProjectTeam,
     isProjectCompleted,
     Project,
 } from "../../lib/linear";
@@ -35,25 +35,26 @@ export default {
     populate(
         slide: GoogleAppsScript.Slides.Slide,
         project: Project,
-        initiative: Initiative,
         config: { withAssigneeAvatars: boolean },
     ) {
         removeShapesAndImages(slide);
 
-        const initiativeEmoji = getEmojiFromJSON(initiative.icon);
+        const team = getProjectTeam(project);
 
-        // Small bold title for the initiative with emoji above project title
-        insertTextBox(
-            slide,
-            { fontColor: TEXT_COLOR_SECONDARY, fontSize: 12 },
-            {
-                left: 50,
-                top: 30,
-                width: 600,
-                height: 20,
-            },
-            `${rightPad(initiativeEmoji)}${initiative.name}`,
-        );
+        // Small title for the team above project title
+        if (team) {
+            insertTextBox(
+                slide,
+                { fontColor: TEXT_COLOR_SECONDARY, fontSize: 12 },
+                {
+                    left: 50,
+                    top: 30,
+                    width: 600,
+                    height: 20,
+                },
+                `${team} Team`,
+            );
+        }
 
         // Big bold title for the project with emoji
         insertTextBox(

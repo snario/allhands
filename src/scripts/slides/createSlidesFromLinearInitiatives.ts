@@ -17,17 +17,15 @@ import {
     getOrSetSecretInteractive,
     saveDocumentProperty,
 } from "../../lib/googleAppsScript";
-import InitiativeSlide from "./initiativeSlide";
 import {
-    fetchAllInitiatives,
     fetchAllProjects,
-    fetchInitiative,
     fetchProject,
-    InitiativeWithProjects,
-    mapProjectsToInitiatives,
+    groupProjectsByTeam,
+    sortProjectsWithinTeam,
+    getRandomizedTeamOrder,
+    Project,
 } from "../../lib/linear";
 import ProjectSlide from "./projectSlide";
-import AgendaSlide from "./agendaSlide";
 import { insertTextBox } from "../../lib/googleSlides";
 import { TEXT_COLOR_SECONDARY } from "../../constants";
 
@@ -39,22 +37,22 @@ export function createSlidesFromLinear(): void {
 
     const apiKey = getOrSetSecretInteractive(SlidesApp, "LINEAR_API_KEY");
 
-    const initiatives = fetchAndPrepareData(apiKey);
-
+    const projects = fetchAllProjects(apiKey);
+    
     Logger.log(`Presentation URL: ${presentation.getUrl()}`);
 
     let cache = fetchCacheFromDocumentProperties(presentation);
 
     const config = JSON.parse(getDocumentProperty("configSettings")) || {};
 
-    cache = generateSlidesAndUpdateCache(
+    cache = generateProjectSlidesAndUpdateCache(
         presentation,
-        initiatives,
+        projects,
         cache,
         config,
     );
 
-    Logger.log("Slides created or updated successfully");
+    Logger.log("Project slides created or updated successfully");
 
     saveCacheToDocumentProperties(presentation, cache);
 }
@@ -86,8 +84,6 @@ export function updateExistingProjectSlide() {
 
     const project = fetchProject(apiKey, projectId);
 
-    const initiative = fetchInitiative(apiKey, project.initiatives.nodes[0].id);
-
     const projectSlide = getOrCreateSlideWithCache(
         presentation,
         projectSlideMap,
@@ -96,67 +92,35 @@ export function updateExistingProjectSlide() {
 
     const config = JSON.parse(getDocumentProperty("configSettings"));
 
-    ProjectSlide.populate(projectSlide, project, initiative, config);
+    ProjectSlide.populate(projectSlide, project, config);
 }
 
-function fetchAndPrepareData(apiKey: string): InitiativeWithProjects[] {
-    return mapProjectsToInitiatives(
-        fetchAllInitiatives(apiKey),
-        fetchAllProjects(apiKey),
-    );
-}
-
-function generateSlidesAndUpdateCache(
+function generateProjectSlidesAndUpdateCache(
     presentation: GoogleAppsScript.Slides.Presentation,
-    initiatives: InitiativeWithProjects[],
+    projects: Project[],
     cache: {
         projectSlideMap: Record<string, string>;
-        agendaSlideMap: Record<string, string>;
-        initiativeSlideMap: Record<string, string>;
     },
     config: {
-        includeProjectSlides: boolean;
-        includeAgendaSlide: boolean;
         withAssigneeAvatars: boolean;
     },
 ) {
-    const { projectSlideMap, agendaSlideMap, initiativeSlideMap } = cache;
+    const { projectSlideMap } = cache;
 
-    initiatives.forEach((initiative) => {
-        if (config.includeAgendaSlide) {
-            const agendaSlide = getOrCreateSlideWithCache(
-                presentation,
-                agendaSlideMap,
-                initiative.id,
-            );
-            AgendaSlide.populate(
-                agendaSlide,
-                initiatives,
-                initiative.id,
-                config,
-            );
-        }
+    const groupedProjects = groupProjectsByTeam(projects);
+    const teamOrder = getRandomizedTeamOrder();
 
-        const initiativeSlide = getOrCreateSlideWithCache(
-            presentation,
-            initiativeSlideMap,
-            initiative.id,
-        );
-        InitiativeSlide.populate(initiativeSlide, initiative, config);
-
-        if (config.includeProjectSlides) {
-            initiative.projects.forEach((project) => {
+    teamOrder.forEach((team) => {
+        if (groupedProjects[team]) {
+            const sortedProjects = sortProjectsWithinTeam(groupedProjects[team]);
+            
+            sortedProjects.forEach((project) => {
                 const projectSlide = getOrCreateSlideWithCache(
                     presentation,
                     projectSlideMap,
                     project.id,
                 );
-                ProjectSlide.populate(
-                    projectSlide,
-                    project,
-                    initiative,
-                    config,
-                );
+                ProjectSlide.populate(projectSlide, project, config);
             });
         }
     });
@@ -174,18 +138,6 @@ function fetchCacheFromDocumentProperties(
                     `${ProjectSlide.cacheKey}_${presentation.getId()}`,
                 ),
             ) || {},
-        agendaSlideMap:
-            JSON.parse(
-                getDocumentProperty(
-                    `${AgendaSlide.cacheKey}_${presentation.getId()}`,
-                ),
-            ) || {},
-        initiativeSlideMap:
-            JSON.parse(
-                getDocumentProperty(
-                    `${InitiativeSlide.cacheKey}_${presentation.getId()}`,
-                ),
-            ) || {},
     };
 }
 
@@ -193,21 +145,11 @@ function saveCacheToDocumentProperties(
     presentation: GoogleAppsScript.Slides.Presentation,
     cache: {
         projectSlideMap: Record<string, string>;
-        agendaSlideMap: Record<string, string>;
-        initiativeSlideMap: Record<string, string>;
     },
 ) {
     saveDocumentProperty(
         `${ProjectSlide.cacheKey}_${presentation.getId()}`,
         JSON.stringify(cache.projectSlideMap),
-    );
-    saveDocumentProperty(
-        `${AgendaSlide.cacheKey}_${presentation.getId()}`,
-        JSON.stringify(cache.agendaSlideMap),
-    );
-    saveDocumentProperty(
-        `${InitiativeSlide.cacheKey}_${presentation.getId()}`,
-        JSON.stringify(cache.initiativeSlideMap),
     );
 }
 

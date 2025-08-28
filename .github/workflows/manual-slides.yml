@@ -1,0 +1,185 @@
+name: Manual Slide Generation
+
+on:
+  workflow_dispatch:
+    inputs:
+      presentation_id:
+        description: 'Google Slides Presentation ID (optional - will create new if empty)'
+        required: false
+        type: string
+      notify_slack:
+        description: 'Send Slack notification'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  generate-slides:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup clasp credentials
+        env:
+          CLASP_CREDENTIALS: ${{ secrets.CLASP_CREDENTIALS }}
+        run: |
+          echo "Setting up clasp credentials..."
+          mkdir -p ~/.config/clasp
+          echo "$CLASP_CREDENTIALS" | base64 -d > ~/.clasprc.json
+          
+      - name: Create .clasp.json
+        env:
+          CLASP_SCRIPT_ID: ${{ secrets.CLASP_SCRIPT_ID }}
+        run: |
+          echo "Creating .clasp.json with script ID..."
+          cat > .clasp.json << EOF
+          {
+            "scriptId": "$CLASP_SCRIPT_ID",
+            "rootDir": "./dist"
+          }
+          EOF
+
+      - name: Build and deploy
+        run: |
+          echo "Building and deploying..."
+          npm run build
+          npx clasp push --force
+          sleep 5
+
+      - name: Execute slide generation
+        id: execute
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          PRESENTATION_ID: ${{ inputs.presentation_id || secrets.GOOGLE_PRESENTATION_ID }}
+        run: |
+          echo "Executing manual slide generation..."
+          
+          cat > execute_slides.js << 'EOF'
+          const { execSync } = require('child_process');
+          
+          try {
+            console.log('Executing slide generation via clasp...');
+            
+            const result = execSync('npx clasp run executeSlideGeneration', {
+              encoding: 'utf-8',
+              stdio: 'pipe',
+              timeout: 300000
+            });
+            
+            console.log('Execution result:', result);
+            
+            const urlMatch = result.match(/https:\/\/docs\.google\.com\/presentation\/d\/([a-zA-Z0-9-_]+)/);
+            if (urlMatch) {
+              console.log('::set-output name=presentation_url::' + urlMatch[0]);
+            }
+            
+            console.log('::set-output name=success::true');
+            console.log('::set-output name=output::' + result.replace(/\n/g, '\\n'));
+            
+          } catch (error) {
+            console.error('Execution failed:', error.message);
+            console.log('::set-output name=success::false');
+            console.log('::set-output name=error::' + error.message.replace(/\n/g, '\\n'));
+            process.exit(1);
+          }
+          EOF
+          
+          node execute_slides.js
+
+      - name: Send notification
+        if: steps.execute.outputs.success == 'true' && inputs.notify_slack == true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PRESENTATION_URL: ${{ steps.execute.outputs.presentation_url }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            echo "Sending manual execution notification to Slack..."
+            
+            TRIGGERED_BY="${{ github.actor }}"
+            CURRENT_DATE=$(date "+%B %d, %Y at %H:%M UTC")
+            
+            PAYLOAD=$(cat << EOF
+          {
+            "text": "🎯 Manual Slide Generation Completed",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🎯 Manual Slides Generated"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered by:* $TRIGGERED_BY"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Date:* $CURRENT_DATE"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "📊 View Slides"
+                    },
+                    "url": "$PRESENTATION_URL",
+                    "style": "primary"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+            )
+            
+            curl -X POST -H 'Content-type: application/json' \
+              --data "$PAYLOAD" \
+              "$SLACK_WEBHOOK_URL"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🎯 Manual Slide Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date "+%B %d, %Y at %H:%M UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.execute.outputs.success == 'true' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.execute.outputs.success }}" == "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🎉 Slides Generated Successfully!" >> $GITHUB_STEP_SUMMARY
+            if [ -n "${{ steps.execute.outputs.presentation_url }}" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**📊 [View Generated Slides](${{ steps.execute.outputs.presentation_url }})**" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Generation Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Error:** \`${{ steps.execute.outputs.error || 'Unknown error' }}\`" >> $GITHUB_STEP_SUMMARY
+          fi

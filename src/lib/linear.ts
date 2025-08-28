@@ -29,7 +29,7 @@ export type Project = {
     url: string;
     status: { name: "Planned" | "In Progress" | "Completed" | "Canceled" };
     projectUpdates: { nodes: ProjectUpdate[] };
-    initiatives: { nodes: { id: string }[] };
+    teams: { nodes: { key: string; name: string }[] };
     lead: User;
     health: "atRisk" | "offTrack" | "onTrack" | "unknown";
 };
@@ -45,6 +45,9 @@ export type ProjectUpdate = {
 };
 
 const LINEAR_API_URL = "https://api.linear.app/graphql";
+
+const TEAMS = ['EV', 'CASH', 'MKT', 'FIN', 'ENG'] as const;
+export type TeamKey = typeof TEAMS[number];
 
 const HealthIconUrls = {
     AT_RISK: "https://liamhorne.com/assets/img/icons/atrisk.png",
@@ -117,73 +120,56 @@ export function getStatusIconUrl(health: Initiative["status"]) {
     }
 }
 
-export const countProjectHealth = (initiative: InitiativeWithProjects) =>
-    initiative.projects.reduce(
-        (statusCount, project) => {
-            switch (project.health) {
-                case "onTrack":
-                    statusCount.onTrack++;
-                    break;
-                case "atRisk":
-                    statusCount.atRisk++;
-                    break;
-                case "offTrack":
-                    statusCount.offTrack++;
-                    break;
-                default:
-                    statusCount.unknown++;
-            }
-            return statusCount;
-        },
-        { onTrack: 0, atRisk: 0, offTrack: 0, unknown: 0 },
-    );
 
 export function isProjectCompleted(project: Project) {
     return project.status.name === "Completed";
 }
 
-export function isInitiativeCompleted(initiative: Initiative) {
-    return initiative.status === "Completed";
-}
 
-export function mapProjectsToInitiatives(
-    initiatives: Initiative[],
-    projects: Project[],
-): InitiativeWithProjects[] {
-    const tmp: Record<string, InitiativeWithProjects> = {};
 
-    initiatives.forEach((initiative) => {
-        tmp[initiative.id] = { ...initiative, projects: [] };
-    });
-
-    projects.forEach((project) => {
-        project.initiatives.nodes.forEach((initiative) => {
-            if (tmp[initiative.id]) {
-                tmp[initiative.id].projects.push(project);
-            }
-        });
-    });
-
-    return Object.values(tmp).sort(
-        (a, b) => Date.parse(a.targetDate) - Date.parse(b.targetDate),
-    );
-}
-
-export function fetchInitiative(apiKey: string, initiativeId: string) {
-    const resp = fetchLinearData(apiKey, "GetInitiative", { id: initiativeId });
-    return resp.data.initiative;
-}
 
 export function fetchProject(apiKey: string, projectId: string) {
     const resp = fetchLinearData(apiKey, "GetProject", { id: projectId });
     return resp.data.project;
 }
 
-export function fetchAllInitiatives(apiKey: string) {
-    const data = fetchLinearData(apiKey, "GetInitiatives");
-    return data.data.initiatives.nodes.filter(
-        (node: { status: string }) => node.status === "Active"
-    );
+
+export function getProjectTeam(project: Project): string | null {
+    return project.teams.nodes.length > 0 ? project.teams.nodes[0].key : null;
+}
+
+export function groupProjectsByTeam(projects: Project[]): Record<string, Project[]> {
+    return projects.reduce((groups, project) => {
+        const team = getProjectTeam(project);
+        if (team && TEAMS.includes(team as TeamKey)) {
+            if (!groups[team]) {
+                groups[team] = [];
+            }
+            groups[team].push(project);
+        }
+        return groups;
+    }, {} as Record<string, Project[]>);
+}
+
+export function sortProjectsWithinTeam(projects: Project[]): Project[] {
+    return [...projects].sort((a, b) => {
+        const aCompleted = a.status.name === "Completed";
+        const bCompleted = b.status.name === "Completed";
+        
+        if (aCompleted && !bCompleted) return -1;
+        if (!aCompleted && bCompleted) return 1;
+        
+        return new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime();
+    });
+}
+
+export function getRandomizedTeamOrder(): string[] {
+    const shuffled = [...TEAMS];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
 }
 
 export function fetchAllProjects(apiKey: string) {
@@ -203,12 +189,7 @@ export function fetchAllProjects(apiKey: string) {
         endCursor = pageInfo.endCursor;
     }
 
-    allProjects = allProjects.sort(
-        (a, b) =>
-            new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime(),
-    );
-
-    return allProjects.filter((obj) => obj.initiatives.nodes.length > 0);
+    return allProjects.filter((project) => project.teams.nodes.length > 0);
 }
 
 export function fetchLinearData(

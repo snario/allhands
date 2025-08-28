@@ -8,6 +8,10 @@ import {
     createSlidesFromLinear,
     updateExistingProjectSlide,
 } from "./scripts/slides/createSlidesFromLinearInitiatives";
+import {
+    executeSlideGeneration,
+    manualSlideGeneration,
+} from "./scripts/automation/remoteExecution";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function onOpen() {
@@ -16,6 +20,9 @@ function onOpen() {
         .addItem("Email Project Leads with Slides", "emailProjectsToUserEmails")
         .addItem("Create Linear Slides", "createSlidesFromLinear")
         .addItem("Update Project Slide", "updateExistingProjectSlide")
+        .addSeparator()
+        .addItem("🤖 Test Weekly Automation", "manualSlideGeneration")
+        .addSeparator()
         .addItem("Show Configuration", "showConfigDialog")
         .addToUi();
 }
@@ -30,6 +37,8 @@ const Scripts = {
     emailProjectsToUserEmails: emailProjectLeadsWithSlides,
     createSlidesFromLinear: createSlidesFromLinear,
     updateExistingProjectSlide: updateExistingProjectSlide,
+    executeSlideGeneration: executeSlideGeneration,
+    manualSlideGeneration: manualSlideGeneration,
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
